@@ -1,0 +1,6 @@
+<RCC>
+      <qresource prefix="/">
+           <file>CCHPM.ico</file>
+           <file>CCHPM2.ico</file>
+      </qresource>
+</RCC>
