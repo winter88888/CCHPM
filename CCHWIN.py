@@ -18,6 +18,7 @@ class CCHWIN(QWidget):
         self.btn_counter=0
         self.anidict= {} # key : tankname, Value[0]: cch rail , Value[1] : animation list of this rail. value[2] : index of railslots
         self.buttonlist=[]
+        self.btnText2clericName={}
         self.interval=1
         self.railheight=20
         self.markheight=10
@@ -165,7 +166,7 @@ class CCHWIN(QWidget):
         return True
 
 
-    def create_ani(self,tankname="name",clericid="AAA"):
+    def create_ani(self,tankname="name",clericid="AAA",clericName="name"):
         if self.anidict.get(tankname) == None:
             if not self.__create_cchrail(tankname):
                 print("no enough space to display CH chain for",tankname)
@@ -193,6 +194,7 @@ class CCHWIN(QWidget):
         self.btn.setStyleSheet('QPushButton{border: none; background: green;}')
         self.btn.setText(clericid)
         self.buttonlist.append(self.btn)
+        self.btnText2clericName[clericid]=clericName
         self.btn.show()
 
 
@@ -246,6 +248,17 @@ class CCHWIN(QWidget):
                 a[CCHRAILPTR].deleteLater()
                 self.railslots[a[2]][0]='FREE'
 
+    def yourSpellInterrupted(self):
+
+        for btn in self.buttonlist:
+            if btn.text()==self.you:
+                btn.hide()
+
+    def someoneSpellInterrupted(self,clericName:str):
+        for btn in self.buttonlist:
+            if btn.text() in self.btnText2clericName:
+                if self.btnText2clericName[btn.text()] == clericName:
+                    btn.hide()
 
 
     def restart_ani(self):

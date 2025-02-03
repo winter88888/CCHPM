@@ -3,12 +3,14 @@ import os
 import time
 from ui_CFGWIN import *
 from CCHWIN import *
+from AgroMeter import *
 from PyQt5 import QtCore, QtGui, QtWidgets
 import pathlib
 import datetime
 import pickle
 import random
 from systemtray import *
+import WeaponEditor
 import resource
 
 #const definition
@@ -18,6 +20,9 @@ LOG_MONITORING_INTERVAL=10 # 10 milliseconds
 LOGDIR_MONITORING_INTERVAL=3000 # 3 seconds
 CCHWIN_MONITORING_INTERVAL=100
 TEST_CHAIN_INTERVAL=1000
+CLEANSING_AGRO_METER_INTERVAL=60       #default is to cleanse agro table dictionary very miniute
+HIDE_AGRO_METER_INTERVAL=60             #default is to hide agro meter if no new agro action in a minute
+AGRO_TABLE_EXPIRE_DURATION= 10          #default is 10 mins for unseen slain msg, hence need to clear that mob.
 
 class CFGWIN(QWidget,Ui_CFGWIN):
     def __init__(self):
@@ -26,6 +31,9 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.setWindowIcon(QIcon(":/CCHPM.ico"))
         self.setFixedSize(self.size())
         self.cchwin = CCHWIN()
+        self.agroMeter=AgroMeter()
+        self.we=WeaponEditor.WeaponEditor()
+        self.we.callbackToMain=self
         self.initializing = True
         self.msg('INFO:Initializing configuration.Please wait...')
         self.configdata={}
@@ -33,6 +41,7 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.lastSizesOfLogFiles={}
         self.curLogFile=''
         self.logfilechanged=False
+        self.yourName="none"
         self.f = open('CCHPM RUN LOG.txt','r',encoding='utf-8')
         #self.defaultwindowflags=self.cchwin.windowFlags()
         self.init_style=self.style()
@@ -42,6 +51,7 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.cchwin_timer.start(CCHWIN_MONITORING_INTERVAL)
         self.testchain_timer = QTimer(self)
         self.testchain_timer.timeout.connect(self.testchain)
+
 
 
         self.pushButton_6.setEnabled(False)
@@ -65,18 +75,35 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.showcchwin = True
         self.testchain_started=False
 
+        self.cleansingAgroMeter_timer = QTimer(self.agroMeter)
+        self.cleansingAgroMeter_timer.timeout.connect(self.agroMeter.cleansingTimerHandler)
+        self.cleansingAgroMeter_timer.start(CLEANSING_AGRO_METER_INTERVAL*1000)
+
+        self.hideAgroMeter_timer = QTimer(self.agroMeter)
+        self.hideAgroMeter_timer.timeout.connect(self.agroMeter.hideAgroMeterHandler)
+        self.hideAgroMeter_timer.start(self.hideAgroMeterInterval*1000)
+
+
+
     def closeEvent(self,event):
         self.cfgwin_geo = self.geometry()
+        self.MHWeapon = self.agroMeter.MHWeapon
+        self.OHWeapon = self.agroMeter.OHWeapon
         self.saveconfig()
         self.cchwin.close()
+        self.agroMeter.close()
+        self.we.close()
         event.accept()
         QtWidgets.qApp.quit()
 
     def hideEvent(self,event):
 
         self.setWindowFlags(QtCore.Qt.SplashScreen)
+
         event.accept()
 
+    def weaponEditeComplete(self):
+        self.agroMeter.initializeWeaponBase()
 
     def msg(self,message:str):
         curr_time = datetime.datetime.now()
@@ -105,6 +132,14 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.configdata['cfgwin_geo'] = QtCore.QRect(546, 257, 827, 526)
         self.configdata['hotkeyFormatstr'] = '### - CH - tankname'
         self.configdata['hotkeyFormatList'] = ['### - CH - tankname','ST ### CH -- tankname']
+
+        self.configdata['agroMeterEnabled'] = True
+        self.configdata['agroMeterGeo'] = QtCore.QRect(1188, 654, 372, 155)
+        self.configdata['hideAgroMeterInterval'] =HIDE_AGRO_METER_INTERVAL
+        self.configdata['agroTableExpireDuration'] =AGRO_TABLE_EXPIRE_DURATION
+        self.configdata['weaponDict']={"None":("???","???")}
+        self.configdata['agroMeterOpacity']=100
+
 
     def initialize_from_configfile(self):
 
@@ -184,9 +219,34 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.comboBox_2.setCurrentIndex(self.comboBox_2.findText(self.hotkeyFormatstr))
         self.pushButton_12.setEnabled(False)
 
+
         self.msg("INFO:CCHPM finished initialization. Waiting for your order now.")
         self.cchwin.restart_ani()
         self.cchwin.reAdjustRails()
+
+        self.agroMeterEnabled = self.configdata['agroMeterEnabled']
+        self.checkBox_2.setChecked(self.agroMeterEnabled)
+
+        self.agroMeterGeo = self.configdata['agroMeterGeo']
+        self.agroMeter.setGeometry(self.agroMeterGeo)
+        self.agroMeter.reAdjustPanel()
+        self.hideAgroMeterInterval=self.configdata['hideAgroMeterInterval']
+        self.spinBox_23.setValue(int(self.hideAgroMeterInterval))
+        self.agroTableExpireDuration=self.configdata['agroTableExpireDuration']
+        self.agroMeter.agroTableExpireDuration=self.agroTableExpireDuration
+        self.spinBox_25.setValue(self.agroTableExpireDuration)
+
+        self.weaponDict = self.configdata['weaponDict']
+        self.MHWeapon="???"
+        self.OHWeapon="???"
+        self.agroMeterOpacity=self.configdata['agroMeterOpacity']
+        self.spinBox_13.setValue(self.agroMeterOpacity)
+        self.agroMeter.label_agroMeterGreen.setWindowOpacity(float(self.agroMeterOpacity)/100)
+        self.agroMeter.label_agroMeterYellow.setWindowOpacity(float(self.agroMeterOpacity) / 100)
+        self.agroMeter.label_errorMessage.setWindowOpacity(float(self.agroMeterOpacity) / 100)
+
+
+
 
     def hotkeyFormatParse(self,hotkeyFormatstr:str):
         #headkeyword,  ###,middlekeyword,tankname,tailkeyword.
@@ -244,7 +304,14 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             self.hotkeyFormatList.append(self.comboBox_2.itemText(i))
         self.configdata['hotkeyFormatList'] = self.hotkeyFormatList.copy()
 
-
+        self.configdata['agroMeterEnabled'] =  self.agroMeterEnabled
+        self.agroMeterGeo = self.agroMeter.geometry()
+        self.configdata['agroMeterGeo'] = self.agroMeterGeo
+        self.configdata["hideAgroMeterInterval"] = self.hideAgroMeterInterval
+        self.configdata['agroTableExpireDuration']=self.agroTableExpireDuration
+        self.configdata['agroMeterOpacity']=self.agroMeterOpacity
+        self.weaponDict[self.yourName]=(self.MHWeapon,self.OHWeapon)
+        self.configdata['weaponDict']=self.weaponDict
 
         with open('CCHPM.ini', 'wb') as f:
             pickle.dump(self.configdata, f)
@@ -319,7 +386,12 @@ class CFGWIN(QWidget,Ui_CFGWIN):
                 if self.curLogFile==filename:
                     self.lastSizesOfLogFiles[filename]=currentSizesOfLogFiles[filename]
                     return
+                if self.curLogFile!="":
+                    self.yourName = self.curLogFile.split("_")[1]
+                    self.saveWeaponForYourName()
                 self.curLogFile=filename
+                self.yourName=self.curLogFile.split("_")[1]
+                self.setWeaponsForYourName()
                 self.msg(f"INFO:Current log file is: {self.curLogFile}")
                 self.logfilechanged = True
 
@@ -357,6 +429,8 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         line=self.f.readline()
         while(line):
             self.logProcessor(line)
+            if self.agroMeterEnabled==True:
+                self.agroMeter.logProcessor(line)
             line = self.f.readline()
 
     def logProcessor(self,line:str):
@@ -377,6 +451,13 @@ class CFGWIN(QWidget,Ui_CFGWIN):
 
         if(line.find('CH') != -1):
             self.CH_hotkey_match(line)
+
+        if line[26:]==' Your spell is interrupted.\n':
+            self.cchwin.yourSpellInterrupted()
+
+        ki=line[26:].find("'s casting is interrupted!")
+        if ki != -1:
+            self.cchwin.someoneSpellInterrupted(line[27:26+ki])
 
     def CH_hotkey_match(self,line:str):
 
@@ -427,7 +508,7 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.msg(f"{clericName},{clericSN}, CH -> {tankname}")
 
         if self.started and tankname != '':
-            self.cchwin.create_ani(tankname,clericSN)
+            self.cchwin.create_ani(tankname,clericSN,clericName)
             if clericName == 'You':
                 self.cchwin.you= clericSN
 
@@ -444,6 +525,8 @@ class CFGWIN(QWidget,Ui_CFGWIN):
     def restart(self):
 
         self.cchwin.restart_ani()
+        self.agroMeter.hideAgroMeter()
+        self.agroMeter.clearAgroTable()
         self.msg("INFO:Clearing screen. You can also use the in game command /t clearcch to do the same.")
 
     def autostart(self,ifautostart:bool):
@@ -458,6 +541,44 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             self.msg("INFO:CCHPM will automatically parse logs when it starts.")
         else:
             self.msg("INFO:CCHPM will not automatically parse log when it starts.")
+
+    def agroMeterEnabled(self,agroMeterEnabled:bool):
+        if self.initializing:
+            return
+
+        self.agroMeterEnabled=agroMeterEnabled
+
+        self.saveconfig()
+        if self.agroMeterEnabled:
+            self.msg("INFO:Agro Meter function enabled.")
+        else:
+            self.msg("INFO:Agro Meter function disabled.")
+            self.agroMeter.hide()
+            self.agroMeter.hideAgroMeter()
+
+    def weaponEditor(self):
+        #self.we.setWindowFlags(QtCore.Qt.Tool)
+
+        self.we.show()
+
+    def setWeaponsForYourName(self):
+
+        if self.yourName in self.weaponDict:
+            self.MHWeapon=self.weaponDict[self.yourName][0]
+            self.OHWeapon=self.weaponDict[self.yourName][1]
+        else:
+            self.MHWeapon="???"
+            self.OHWeapon="???"
+
+        self.agroMeter.UpdateMHWeapons(self.MHWeapon)
+        self.agroMeter.UpdateOHWeapons(self.OHWeapon)
+
+    def saveWeaponForYourName(self):
+
+        self.MHWeapon = self.agroMeter.MHWeapon
+        self.OHWeapon = self.agroMeter.OHWeapon
+        self.saveconfig()
+
 
 
     def startorstop(self):
@@ -510,6 +631,14 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.cchwin.setGeometry(self.cchwinGeo)
         self.cchwin.show()
 
+
+        if self.agroMeterEnabled:
+            self.agroMeter.setWindowOpacity(0.5)
+            self.agroMeter.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Tool)
+            self.agroMeter.setGeometry(self.agroMeterGeo)
+            self.agroMeter.show()
+
+
     def modifyMonitorUIdone(self):
 
         self.locked = True
@@ -537,6 +666,10 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.cchwinStop()
         self.cchwinAdapt()
 
+        self.agroMeter.hide()
+        if self.agroMeterEnabled:
+            self.agroMeter.reAdjustPanel()
+
     def lockunlock(self):
         if self.locked:
             self.modifyMonitorUIstart()
@@ -547,17 +680,22 @@ class CFGWIN(QWidget,Ui_CFGWIN):
     def cchwinSave(self):
         self.cchwin.restart_ani()
         self.cchwin.reAdjustRails()
-
+        self.agroMeter.reAdjustPanel()
         #此处需获取CCHWIN的相关参数，并保存到配置文件中，包括geometry
         self.msg("Saving current configurations and readjust UI layout.")
         print('cch window geo:'+str(self.cchwinGeo))
         print('saving!')
         self.saveconfig() #需补保存窗口位置的代码。
 
+
+
+
     def cchwinCreate(self):
 
         self.cchwin.resume_ani()
         self.testchain_timer.start(TEST_CHAIN_INTERVAL)
+        if self.agroMeterEnabled:
+            self.agroMeter.testAgroMeter()
         self.msg("Creating test CH chain now.")
         self.testchain_started = True
 
@@ -574,11 +712,14 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.testchain_started = False
         self.cchwin.pause_ani()
         self.testchain_timer.stop()
+        self.agroMeter.stopTestAgroMeter()
         self.msg("Test CH chain stops.")
 
     def cchwinAdapt(self):
         self.cchwin.restart_ani()
         self.cchwin.reAdjustRails()
+        if self.agroMeterEnabled:
+            self.agroMeter.reAdjustPanel()
         self.msg("Readjust UI layout.")
 
     def default(self):
@@ -639,6 +780,49 @@ class CFGWIN(QWidget,Ui_CFGWIN):
 
         self.saveconfig()
         self.msg(f"INFO:Chaged height margin to {heigthMargin}.")
+
+    def messageFadeTimerChangedHandler(self,timer_sec:int):
+        if self.initializing:
+            return
+
+        if timer_sec >= 0:
+            self.hideAgroMeterInterval=timer_sec
+            self.hideAgroMeter_timer.start(self.hideAgroMeterInterval*1000)
+
+        self.saveconfig()
+        self.msg(f"INFO:Chaged hide agro meter interval to {timer_sec} seconds.")
+
+
+    def lazyAgroTimerChangedHandler(self,timer_min:int):
+        if self.initializing:
+            return
+
+        if timer_min >= 1:
+            self.agroMeter.agroTableExpireDuration=timer_min*60
+
+        self.saveconfig()
+        self.msg(f"INFO:Chaged lazy agro timer to {timer_min} minutes.")
+
+    def setAgroMeterBackgroundColor(self):   #unusing function
+        color = QtWidgets.QColorDialog.getColor()  # 打开颜色选择对话框
+        if color.isValid():  # 如果用户选择了有效的颜色
+            print(color.name())
+            self.agroMeter.label_agroMeterGreen.setStyleSheet(f"background: {color.name()};")  # 设置窗口背景颜色
+            self.agroMeter.label_agroMeterYellow.setStyleSheet(f"background: {color.name()};")  # 设置窗口背景颜色
+            self.agroMeter.label_errorMessage.setStyleSheet(f"background: {color.name()};")  # 设置窗口背景颜色
+
+    def agroMeterOpacity(self,opactiy:int):
+        if self.initializing:
+            return
+
+        self.agroMeterOpacity=opactiy
+        self.agroMeter.label_agroMeterGreen.setWindowOpacity(float(opactiy)/100)
+        self.agroMeter.label_agroMeterYellow.setWindowOpacity(float(opactiy) / 100)
+        self.agroMeter.label_errorMessage.setWindowOpacity(float(opactiy) / 100)
+
+        self.saveconfig()
+        self.msg(f"INFO:Agro meter pannel opacity chnanged to 0.{opactiy}")
+
 
     def changeCHFormat(self,formatstr):
         if self.initializing:

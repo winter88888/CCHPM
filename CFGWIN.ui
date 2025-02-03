@@ -201,11 +201,11 @@
      <x>10</x>
      <y>150</y>
      <width>711</width>
-     <height>101</height>
+     <height>141</height>
     </rect>
    </property>
    <property name="title">
-    <string>CH BAR Settings</string>
+    <string>Chain CH Performance Monitor Settings</string>
    </property>
    <widget class="QLabel" name="label_5">
     <property name="geometry">
@@ -424,6 +424,25 @@
     </property>
     <property name="text">
      <string>Marks</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>110</y>
+      <width>181</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>11</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>ON AIR automatically</string>
     </property>
    </widget>
   </widget>
@@ -672,25 +691,6 @@
     <string>Step 4. Setup CH interval(second)</string>
    </property>
   </widget>
-  <widget class="QCheckBox" name="checkBox">
-   <property name="geometry">
-    <rect>
-     <x>90</x>
-     <y>270</y>
-     <width>181</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Arial</family>
-     <pointsize>11</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>Autostart CCH monitor</string>
-   </property>
-  </widget>
   <widget class="QLabel" name="label_9">
    <property name="geometry">
     <rect>
@@ -741,19 +741,6 @@
      <string>ST ### CH -- tankname</string>
     </property>
    </item>
-  </widget>
-  <widget class="QLabel" name="label_10">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>270</y>
-     <width>81</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Start mode:</string>
-   </property>
   </widget>
   <widget class="QPushButton" name="pushButton_11">
    <property name="geometry">
@@ -812,6 +799,150 @@
     </property>
    </item>
   </widget>
+  <widget class="QGroupBox" name="groupBox_3">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>300</y>
+     <width>711</width>
+     <height>101</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Agro Meter Settings</string>
+   </property>
+   <widget class="QLabel" name="label_31">
+    <property name="geometry">
+     <rect>
+      <x>209</x>
+      <y>30</y>
+      <width>161</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Message Fade timer(s)</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="spinBox_23">
+    <property name="geometry">
+     <rect>
+      <x>370</x>
+      <y>30</y>
+      <width>51</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="minimum">
+     <number>1</number>
+    </property>
+    <property name="maximum">
+     <number>120</number>
+    </property>
+    <property name="value">
+     <number>20</number>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="spinBox_25">
+    <property name="geometry">
+     <rect>
+      <x>371</x>
+      <y>70</y>
+      <width>51</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="minimum">
+     <number>1</number>
+    </property>
+    <property name="maximum">
+     <number>120</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_33">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>70</y>
+      <width>151</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Lazy Agro timer(min)</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>181</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>11</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Enable Agro Meter</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_13">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>60</y>
+      <width>131</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Agro Weapon Editor</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="spinBox_13">
+    <property name="geometry">
+     <rect>
+      <x>600</x>
+      <y>30</y>
+      <width>51</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="minimum">
+     <number>0</number>
+    </property>
+    <property name="maximum">
+     <number>100</number>
+    </property>
+    <property name="singleStep">
+     <number>5</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_22">
+    <property name="geometry">
+     <rect>
+      <x>450</x>
+      <y>30</y>
+      <width>141</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Message Opacity</string>
+    </property>
+   </widget>
+  </widget>
   <zorder>line_6</zorder>
   <zorder>line_5</zorder>
   <zorder>line_7</zorder>
@@ -839,13 +970,12 @@
   <zorder>label_8</zorder>
   <zorder>spinBox_4</zorder>
   <zorder>label_4</zorder>
-  <zorder>checkBox</zorder>
   <zorder>label_9</zorder>
   <zorder>comboBox_2</zorder>
-  <zorder>label_10</zorder>
   <zorder>pushButton_11</zorder>
   <zorder>pushButton_12</zorder>
   <zorder>comboBox_3</zorder>
+  <zorder>groupBox_3</zorder>
  </widget>
  <resources/>
  <connections>
@@ -1201,6 +1331,86 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>checkBox_2</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>CFGWIN</receiver>
+   <slot>agroMeterEnabled()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>211</x>
+     <y>309</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>334</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_13</sender>
+   <signal>clicked()</signal>
+   <receiver>CFGWIN</receiver>
+   <slot>weaponEditor()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>289</x>
+     <y>314</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>346</x>
+     <y>369</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBox_23</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>CFGWIN</receiver>
+   <slot>messageFadeTimerChangedHandler()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>413</x>
+     <y>345</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>461</x>
+     <y>635</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBox_25</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>CFGWIN</receiver>
+   <slot>lazyAgroTimerChangedHandler()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>402</x>
+     <y>383</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>434</x>
+     <y>682</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBox_13</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>CFGWIN</receiver>
+   <slot>agroMeterOpacity()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>627</x>
+     <y>345</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>681</x>
+     <y>564</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>openlogdir()</slot>
@@ -1226,5 +1436,11 @@
   <slot>CHFormatChanged()</slot>
   <slot>deleteCHFormat()</slot>
   <slot>markPosition()</slot>
+  <slot>agroMeterEnabled()</slot>
+  <slot>weaponEditor()</slot>
+  <slot>messageFadeTimerChangedHandler()</slot>
+  <slot>lazyAgroTimerChangedHandler()</slot>
+  <slot>agroMeterOpacity()</slot>
+  <slot>setAgroMeterBackgroundColor()</slot>
  </slots>
 </ui>
