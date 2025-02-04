@@ -460,6 +460,7 @@ class AgroMeter(QWidget):
         for weaponName in self.weaponDict.keys():
             if MHWeaponName==self.weaponDict[weaponName].weaponName:
                 self.MHWeapon=self.weaponDict[weaponName].weaponName
+                self.recompileProcLandMsg(self.currentTarget)
                 if self.weaponDict[weaponName].type =="2hs" or self.weaponDict[weaponName].type =="2hp" or self.weaponDict[weaponName].type =="2hb":
                     self.OHWeapon="N/A"
                     #self.setup2HanderDamageBonus()
@@ -470,6 +471,7 @@ class AgroMeter(QWidget):
             for wa in self.weaponDict[weaponName].weaponAlias:
                 if MHWeaponName==wa:
                     self.MHWeapon = self.weaponDict[weaponName].weaponName
+                    self.recompileProcLandMsg(self.currentTarget)
                     if self.weaponDict[weaponName].type == "2hs" or self.weaponDict[weaponName].type == "2hp" or \
                             self.weaponDict[weaponName].type == "2hb":
                         self.OHWeapon = "N/A"
@@ -489,6 +491,8 @@ class AgroMeter(QWidget):
                     self.OHWeapon = "???"
                     return False
                 self.OHWeapon=self.weaponDict[weaponName].weaponName
+                self.recompileProcLandMsg(self.currentTarget)
+
                 self.setup1hWeaponFireRate()
                 return True
             for wa in self.weaponDict[weaponName].weaponAlias:
@@ -499,6 +503,8 @@ class AgroMeter(QWidget):
                         self.OHWeapon = "???"
                         return False
                     self.OHWeapon = self.weaponDict[weaponName].weaponName
+                    self.recompileProcLandMsg(self.currentTarget)
+
                     self.setup1hWeaponFireRate()
                     return True
         self.OHWeapon="???"
@@ -1294,10 +1300,18 @@ class AgroMeter(QWidget):
 
         if self.currentTarget!=capitalized_mobName:
             self.currentTarget=capitalized_mobName
-            if self.weaponDict[self.MHWeapon].procLandMsg!="":
-                self.currentMHProcLandMessage=self.weaponDict[self.MHWeapon].procLandMsg.replace("Someone",capitalized_mobName,1)
-            if self.weaponDict[self.OHWeapon].procLandMsg!="":
-                self.currentOHProcLandMessage=self.weaponDict[self.OHWeapon].procLandMsg.replace("Someone",capitalized_mobName,1)
+            self.recompileProcLandMsg(capitalized_mobName)
+
+
+    def recompileProcLandMsg(self,capitalized_mobName:str):
+
+        if capitalized_mobName == "":
+            return
+
+        if self.weaponDict[self.MHWeapon].procLandMsg != "":
+            self.currentMHProcLandMessage = self.weaponDict[self.MHWeapon].procLandMsg.replace("Someone",capitalized_mobName, 1)
+        if self.weaponDict[self.OHWeapon].procLandMsg != "":
+            self.currentOHProcLandMessage = self.weaponDict[self.OHWeapon].procLandMsg.replace("Someone",capitalized_mobName, 1)
 
     def updateAgroMeter(self):
         if self.currentTarget=="" or self.currentTarget not in self.agroTableDict:
