@@ -667,7 +667,16 @@ class AgroMeter(QWidget):
                 now=time.time()
                 mobNames=list(self.agroTableDict.keys())
                 for mobName in mobNames:
-                    if now-self.agroTableDict[mobName].lastSeenTime>=self.agroTableExpireDuration:
+                    if now-self.agroTableDict[mobName].lastSeenTime>=self.agroTableExpireDuration*60:
+                        message = f"Mob:{mobName}|Agro total:{self.agroTableDict[mobName].TotalAgro / 1000:0.1f}k|Proc count:{self.agroTableDict[mobName].ProcCount}"
+                        duration = self.agroTableDict[mobName].lastSeenTime - self.agroTableDict[mobName].engageTime
+                        tpm = self.agroTableDict[mobName].TotalAgro / (duration + 1) * 60
+                        if tpm < 1000:
+                            message += "|Threat/min : {:0.0f}".format(tpm)
+                        else:
+                            message += "|Threat/min : {:0.1f}k".format(tpm / 1000)
+                        message += f"|Main hand:{self.MHWeapon}|Off hand:{self.OHWeapon}"
+                        self.logErrorMessage(message, "info")
                         self.agroTableDict.pop(mobName)
             self.cleansingTimerExpired=False
 

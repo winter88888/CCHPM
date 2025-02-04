@@ -798,7 +798,7 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             return
 
         if timer_min >= 1:
-            self.agroMeter.agroTableExpireDuration=timer_min*60
+            self.agroMeter.agroTableExpireDuration=timer_min
 
         self.saveconfig()
         self.msg(f"INFO:Chaged lazy agro timer to {timer_min} minutes.")
