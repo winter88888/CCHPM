@@ -211,7 +211,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>30</y>
+      <y>60</y>
       <width>111</width>
       <height>21</height>
      </rect>
@@ -224,7 +224,7 @@
     <property name="geometry">
      <rect>
       <x>120</x>
-      <y>30</y>
+      <y>60</y>
       <width>42</width>
       <height>22</height>
      </rect>
@@ -243,7 +243,7 @@
     <property name="geometry">
      <rect>
       <x>480</x>
-      <y>30</y>
+      <y>60</y>
       <width>42</width>
       <height>22</height>
      </rect>
@@ -259,7 +259,7 @@
     <property name="geometry">
      <rect>
       <x>370</x>
-      <y>30</y>
+      <y>60</y>
       <width>111</width>
       <height>21</height>
      </rect>
@@ -272,7 +272,7 @@
     <property name="geometry">
      <rect>
       <x>300</x>
-      <y>30</y>
+      <y>60</y>
       <width>42</width>
       <height>22</height>
      </rect>
@@ -288,7 +288,7 @@
     <property name="geometry">
      <rect>
       <x>190</x>
-      <y>30</y>
+      <y>60</y>
       <width>111</width>
       <height>21</height>
      </rect>
@@ -301,7 +301,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>70</y>
+      <y>100</y>
       <width>111</width>
       <height>21</height>
      </rect>
@@ -314,7 +314,7 @@
     <property name="geometry">
      <rect>
       <x>120</x>
-      <y>70</y>
+      <y>100</y>
       <width>42</width>
       <height>22</height>
      </rect>
@@ -330,7 +330,7 @@
     <property name="geometry">
      <rect>
       <x>300</x>
-      <y>70</y>
+      <y>100</y>
       <width>42</width>
       <height>22</height>
      </rect>
@@ -346,7 +346,7 @@
     <property name="geometry">
      <rect>
       <x>190</x>
-      <y>70</y>
+      <y>100</y>
       <width>111</width>
       <height>21</height>
      </rect>
@@ -359,7 +359,7 @@
     <property name="geometry">
      <rect>
       <x>480</x>
-      <y>70</y>
+      <y>100</y>
       <width>42</width>
       <height>22</height>
      </rect>
@@ -375,7 +375,7 @@
     <property name="geometry">
      <rect>
       <x>370</x>
-      <y>70</y>
+      <y>100</y>
       <width>111</width>
       <height>21</height>
      </rect>
@@ -388,7 +388,7 @@
     <property name="geometry">
      <rect>
       <x>660</x>
-      <y>70</y>
+      <y>100</y>
       <width>42</width>
       <height>22</height>
      </rect>
@@ -404,7 +404,7 @@
     <property name="geometry">
      <rect>
       <x>550</x>
-      <y>70</y>
+      <y>100</y>
       <width>111</width>
       <height>21</height>
      </rect>
@@ -417,32 +417,13 @@
     <property name="geometry">
      <rect>
       <x>550</x>
-      <y>30</y>
+      <y>60</y>
       <width>41</width>
       <height>21</height>
      </rect>
     </property>
     <property name="text">
      <string>Marks</string>
-    </property>
-   </widget>
-   <widget class="QCheckBox" name="checkBox">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>110</y>
-      <width>181</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <family>Arial</family>
-      <pointsize>11</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>ON AIR automatically</string>
     </property>
    </widget>
   </widget>
@@ -772,7 +753,7 @@
    <property name="geometry">
     <rect>
      <x>620</x>
-     <y>180</y>
+     <y>210</y>
      <width>91</width>
      <height>22</height>
     </rect>
@@ -943,6 +924,25 @@
     </property>
    </widget>
   </widget>
+  <widget class="QCheckBox" name="checkBox">
+   <property name="geometry">
+    <rect>
+     <x>20</x>
+     <y>180</y>
+     <width>181</width>
+     <height>21</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>11</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string>Enable CCH Monitor</string>
+   </property>
+  </widget>
   <zorder>line_6</zorder>
   <zorder>line_5</zorder>
   <zorder>line_7</zorder>
@@ -976,6 +976,7 @@
   <zorder>pushButton_12</zorder>
   <zorder>comboBox_3</zorder>
   <zorder>groupBox_3</zorder>
+  <zorder>checkBox</zorder>
  </widget>
  <resources/>
  <connections>
@@ -1239,7 +1240,7 @@
    <sender>checkBox</sender>
    <signal>toggled(bool)</signal>
    <receiver>CFGWIN</receiver>
-   <slot>autostart()</slot>
+   <slot>startCHMonitor()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>184</x>
@@ -1430,7 +1431,7 @@
   <slot>cchwinStop()</slot>
   <slot>cchwinAdapt()</slot>
   <slot>openHistoryLog()</slot>
-  <slot>autostart()</slot>
+  <slot>startCHMonitor()</slot>
   <slot>changeCHFormat()</slot>
   <slot>addCHFormat()</slot>
   <slot>CHFormatChanged()</slot>

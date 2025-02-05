@@ -121,12 +121,14 @@ class CFGWIN(QWidget,Ui_CFGWIN):
 
         self.configdata['eqLogDir'] = 'C:\\EQ main directory\Logs'
         self.configdata['serverSlect'] = 'Any'
+        self.configdata['ifautostart'] = True
+
+
+        self.configdata['ifstartCHMonitor'] = True
         self.configdata['mark_pos'] = 'On bar'
         self.configdata['chInterval'] = 1
         self.configdata['cchwinGeo'] = QtCore.QRect(586, 669, 528, 126)
         self.configdata['railheight'] = 20
-
-        self.configdata['ifautostart'] = True
         self.configdata['cchwinwidthMargin'] = 2
         self.configdata['heigthMargin'] = 2
         self.configdata['cfgwin_geo'] = QtCore.QRect(546, 257, 827, 526)
@@ -161,6 +163,12 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.serverSlect = self.configdata['serverSlect']
         self.comboBox.setCurrentIndex(SERVERLIST[self.serverSlect])
 
+        self.ifautostart = self.configdata['ifautostart']
+        self.started = self.ifautostart
+
+        self.ifstartCHMonitor=self.configdata['ifstartCHMonitor']
+        self.checkBox.setChecked(self.ifstartCHMonitor)
+
         self.mark_pos = self.configdata['mark_pos']
         self.comboBox_3.setCurrentIndex(POSlIST[self.mark_pos])
         self.cchwin.mark_pos = self.mark_pos
@@ -176,9 +184,7 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.spinBox.setValue(self.railheight)
         self.cchwin.railheight=self.railheight
 
-        self.ifautostart = self.configdata['ifautostart']
-        self.started = self.ifautostart
-        self.checkBox.setChecked(self.ifautostart)
+
 
         self.logfile_moniter_timer = QTimer(self)
         self.logfile_moniter_timer.timeout.connect(self.scanCurrentLog)
@@ -284,21 +290,21 @@ class CFGWIN(QWidget,Ui_CFGWIN):
 
     def saveconfig(self):
         # to save more config data...
+        self.ifautostart=self.started
+        self.configdata['ifautostart'] = self.ifautostart
         self.configdata['eqLogDir'] = self.eqLogDir
         self.configdata['serverSlect'] = self.serverSlect
-        self.configdata['mark_pos'] = self.mark_pos
 
+        self.configdata['ifstartCHMonitor']=self.ifstartCHMonitor
+        self.configdata['mark_pos'] = self.mark_pos
         self.configdata['chInterval'] = self.chInterval
         self.cchwinGeo = self.cchwin.geometry()
         self.configdata['cchwinGeo'] = self.cchwinGeo
         self.configdata['railheight'] = self.railheight
-
-        self.configdata['ifautostart'] = self.ifautostart
         self.configdata['cchwinwidthMargin'] = self.cchwinwidthMargin
         self.configdata['heigthMargin'] = self.cchwinheigthMargin
         self.configdata['cfgwin_geo'] = self.cfgwin_geo
         self.configdata['hotkeyFormatstr'] = self.hotkeyFormatstr
-
         self.hotkeyFormatList=[]
         for i in range(self.comboBox_2.count()):
             self.hotkeyFormatList.append(self.comboBox_2.itemText(i))
@@ -428,8 +434,9 @@ class CFGWIN(QWidget,Ui_CFGWIN):
 
         line=self.f.readline()
         while(line):
-            self.logProcessor(line)
-            if self.agroMeterEnabled==True:
+            if self.ifstartCHMonitor == True:
+                self.logProcessor(line)
+            if self.agroMeterEnabled == True:
                 self.agroMeter.logProcessor(line)
             line = self.f.readline()
 
@@ -529,18 +536,18 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.agroMeter.clearAgroTable()
         self.msg("INFO:Clearing screen. You can also use the in game command /t clearcch to do the same.")
 
-    def autostart(self,ifautostart:bool):
+    def startCHMonitor(self,ifstartCHMonitor:bool):
 
         if self.initializing:
             return
 
-        self.ifautostart=ifautostart
+        self.ifstartCHMonitor=ifstartCHMonitor
 
         self.saveconfig()
-        if self.ifautostart:
-            self.msg("INFO:CCHPM will automatically parse logs when it starts.")
+        if self.ifstartCHMonitor:
+            self.msg("INFO:CCHPM is enabled.")
         else:
-            self.msg("INFO:CCHPM will not automatically parse log when it starts.")
+            self.msg("INFO:CCHPM is disabled.")
 
     def agroMeterEnabled(self,agroMeterEnabled:bool):
         if self.initializing:
@@ -589,6 +596,8 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             self.logfiledir_moniter_timer.stop()
             self.logfile_moniter_timer.stop()
             self.cchwin.restart_ani()
+            self.agroMeter.hideAgroMeter()
+            self.agroMeter.clearAgroTable()
             self.pushButton_3.setText("PAUSED")
             self.pushButton_3.setFont(self.font())
             self.pushButton_3.setStyleSheet('background-color: red;')

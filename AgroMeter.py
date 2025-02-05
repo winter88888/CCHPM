@@ -560,7 +560,10 @@ class AgroMeter(QWidget):
         if self.checkSpellEffects(line)==True:
             return
 
-        #if self.checkAnySeenMobs(line)==True:
+        if self.checkSkillEffects(line)==True:
+            return
+
+        #if self.checkAnySeenMobs(line)==True:  #not very needed as for now. skipped
         #    return
 
         if self.checkAndSetCurrentTarget(line)==True:
@@ -1198,17 +1201,86 @@ class AgroMeter(QWidget):
 
 
         index=line[26:].find(" is surrounded by darkness.\n")
-        if index!=-1 and self.currentTarget==line[27:26+index]:
-            self.agroTableDict[self.currentTarget].TotalAgro+=400                  #scepter agro is 400
-            self.anyNewActionDetected = True
-            self.updateAgroMeter()
-            return True
+        if index!=-1:
+            if self.currentTarget==line[27].upper()+line[28:26+index]:
+                self.agroTableDict[self.currentTarget].TotalAgro+=400                  #scepter agro is 400
+                self.anyNewActionDetected = True
+                self.updateAgroMeter()
+                return True
 
         if line[26:]==" Your target resisted the Clinging Darkness spell.\n":    #scepter agro is 400
             self.agroToUnknowTarget+=400
             self.anyNewActionDetected = True
             self.updateAgroMeter()
             return True
+
+        return False
+
+
+    def checkSkillEffects(self,line:str):
+
+        if line[26:30] != " You":
+            return False
+
+        if line[26:36]==" You kick ":
+            tailIndex=line[36:].find(" for ")
+            if tailIndex!=-1:
+                mobName = line[36].upper() + line[37:36 + tailIndex]
+                self.setCurrentTarget(mobName)
+                self.agroTableDict[self.currentTarget].TotalAgro += 5  # kick agro is 5
+                self.anyNewActionDetected = True
+                self.updateAgroMeter()
+                return True
+
+        if line[26:43]==" You try to kick ":
+            tailIndex=line[43:].find(", but ")
+            if tailIndex!=-1:
+                mobName = line[43].upper() + line[44:43 + tailIndex]
+                self.setCurrentTarget(mobName)
+                self.agroTableDict[self.currentTarget].TotalAgro += 5  # kick agro is 5
+                self.anyNewActionDetected = True
+                self.updateAgroMeter()
+                return True
+
+
+        if line[26:40]==" You disarmed ":
+            tailIndex=line[40:].find("!")
+            if tailIndex!=-1:
+                mobName = line[40].upper() + line[41:40 + tailIndex]
+                self.setCurrentTarget(mobName)
+                self.agroTableDict[self.currentTarget].TotalAgro += 20  # disarm agro is 20
+                self.anyNewActionDetected = True
+                self.updateAgroMeter()
+                return True
+
+        if line[26:]==" Your attempt to disarm failed.\n":
+                self.agroToUnknowTarget += 20  # disarm agro is 20
+                self.anyNewActionDetected = True
+                self.updateAgroMeter()
+                return True
+
+        #skip Begging , since it seems zero agro.
+
+        if line[26:36]==" You bash ":
+            tailIndex=line[36:].find(" for ")
+            if tailIndex!=-1:
+                mobName = line[36].upper() + line[37:36 + tailIndex]
+                self.setCurrentTarget(mobName)
+                self.agroTableDict[self.currentTarget].TotalAgro += 7  # Bash agro is 7. Slam use same fight msg.but agro is 5. so never use bash , use kick istead. to make it accurate
+                self.anyNewActionDetected = True
+                self.updateAgroMeter()
+                return True
+
+        if line[26:43]==" You try to bash ":
+            tailIndex=line[43:].find(", but ")
+            if tailIndex!=-1:
+                mobName = line[43].upper() + line[44:43 + tailIndex]
+                self.setCurrentTarget(mobName)
+                self.agroTableDict[self.currentTarget].TotalAgro += 7  # Bash agro is 7. Slam use same fight msg.but agro is 5.so never use bash , use kick istead. to make it accurate
+                self.anyNewActionDetected = True
+                self.updateAgroMeter()
+                return True
+
 
 
 
