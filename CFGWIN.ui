@@ -894,7 +894,7 @@
    <widget class="QSpinBox" name="spinBox_13">
     <property name="geometry">
      <rect>
-      <x>600</x>
+      <x>620</x>
       <y>30</y>
       <width>51</width>
       <height>22</height>
@@ -920,7 +920,39 @@
      </rect>
     </property>
     <property name="text">
-     <string>Message Opacity</string>
+     <string>Message Opacity(%)</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="spinBox_14">
+    <property name="geometry">
+     <rect>
+      <x>620</x>
+      <y>70</y>
+      <width>51</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="minimum">
+     <number>1</number>
+    </property>
+    <property name="maximum">
+     <number>999</number>
+    </property>
+    <property name="singleStep">
+     <number>1</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_23">
+    <property name="geometry">
+     <rect>
+      <x>450</x>
+      <y>70</y>
+      <width>171</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>MH Swing Rate in DW(‰)</string>
     </property>
    </widget>
   </widget>
@@ -1403,12 +1435,28 @@
    <slot>agroMeterOpacity()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>627</x>
+     <x>647</x>
      <y>345</y>
     </hint>
     <hint type="destinationlabel">
      <x>681</x>
      <y>564</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBox_14</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>CFGWIN</receiver>
+   <slot>setMainHandSwingRate()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>659</x>
+     <y>380</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>697</x>
+     <y>722</y>
     </hint>
    </hints>
   </connection>
@@ -1443,5 +1491,6 @@
   <slot>lazyAgroTimerChangedHandler()</slot>
   <slot>agroMeterOpacity()</slot>
   <slot>setAgroMeterBackgroundColor()</slot>
+  <slot>setMainHandSwingRate()</slot>
  </slots>
 </ui>

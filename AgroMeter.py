@@ -62,8 +62,10 @@ class AgroMeter(QWidget):
         self.currentOHProcLandMessage = ""
         self.cleansingTimerExpired=False
         self.anyNewActionDetected = False
-        self.realMHFireRate = MAIN_HAND_RATE      #default rate if mh delay == oh delay
-        self.realOHFireRate = OFF_HAND_RATE
+        self.basicMHFireRate = MAIN_HAND_RATE      #default rate if mh delay == oh delay
+        self.basicOHFireRate = OFF_HAND_RATE
+        self.realMHFireRate = 0.55                 #doesn't matter much since this will be loaded from configuration file
+        self.realOHFireRate = 0.45
         self.isCastingTotem = False
         self.isCastingBioOrb = False
         self.agroToUnknowTarget=0
@@ -542,9 +544,10 @@ class AgroMeter(QWidget):
         # using Warrior's formula here from https://wiki.project1999.com/Dual_Wield , also tested on 2025-1-30 , it's like 41% are from off hand swing.
 
         if self.weaponDict[self.MHWeapon].type==self.weaponDict[self.OHWeapon].type:
-            self.realMHFireRate=MAIN_HAND_RATE/(self.weaponDict[self.MHWeapon].delay/self.weaponDict[self.OHWeapon].delay*OFF_HAND_RATE+MAIN_HAND_RATE)
-            self.realOHFireRate=1-self.realMHFireRate
-
+            #self.realMHFireRate=self.basicMHFireRate/(self.weaponDict[self.MHWeapon].delay/self.weaponDict[self.OHWeapon].delay*self.basicOHFireRate+self.basicMHFireRate)
+            self.realMHFireRate = self.basicMHFireRate           #after test to test , this rate seems irrelavant to haste status on player. guess it's a static rate of MH swing:OH swing
+            self.realOHFireRate = 1-self.realMHFireRate
+        #print(f'real mh={self.realMHFireRate:0.3f},real oh={self.realOHFireRate:0.3f}')
 
     def logProcessor(self,line:str):
 

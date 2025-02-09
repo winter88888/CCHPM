@@ -141,6 +141,7 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.configdata['agroTableExpireDuration'] =AGRO_TABLE_EXPIRE_DURATION
         self.configdata['weaponDict']={"None":("???","???")}
         self.configdata['agroMeterOpacity']=100
+        self.configdata['mainHandSwingRate']=553             #This initial value might not be accurate. Need more test. but close to what it truly is for Warrior.
 
 
     def initialize_from_configfile(self):
@@ -251,6 +252,11 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.agroMeter.label_agroMeterYellow.setWindowOpacity(float(self.agroMeterOpacity) / 100)
         self.agroMeter.label_errorMessage.setWindowOpacity(float(self.agroMeterOpacity) / 100)
 
+        self.mainHandSwingRate=self.configdata['mainHandSwingRate']
+        self.spinBox_14.setValue(self.mainHandSwingRate)
+        self.agroMeter.basicMHFireRate=float(self.mainHandSwingRate)/1000
+        self.agroMeter.basicOHFireRate=1-self.agroMeter.basicMHFireRate
+        self.agroMeter.setup1hWeaponFireRate()
 
 
 
@@ -318,6 +324,8 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.configdata['agroMeterOpacity']=self.agroMeterOpacity
         self.weaponDict[self.yourName]=(self.MHWeapon,self.OHWeapon)
         self.configdata['weaponDict']=self.weaponDict
+        self.configdata['mainHandSwingRate']=self.mainHandSwingRate
+
 
         with open('CCHPM.ini', 'wb') as f:
             pickle.dump(self.configdata, f)
@@ -830,7 +838,21 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.agroMeter.label_errorMessage.setWindowOpacity(float(opactiy) / 100)
 
         self.saveconfig()
-        self.msg(f"INFO:Agro meter pannel opacity chnanged to 0.{opactiy}")
+        self.msg(f"INFO:Agro meter's pannel opacity changed to 0.{opactiy}")
+
+    def setMainHandSwingRate(self,rate:int):
+        if self.initializing:
+            return
+
+        self.mainHandSwingRate=rate
+
+        self.agroMeter.basicMHFireRate=float(self.mainHandSwingRate)/1000
+        self.agroMeter.basicOHFireRate=1-self.agroMeter.basicMHFireRate
+        self.agroMeter.setup1hWeaponFireRate()
+
+        self.saveconfig()
+        self.msg(f"INFO:Agro meter's main hand swing rate changed to 0.{rate}")
+
 
 
     def changeCHFormat(self,formatstr):
