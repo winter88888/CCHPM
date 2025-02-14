@@ -195,7 +195,7 @@ class AgroMeter(QWidget):
         self.init_ui()
 
     def init_ui(self):
-        self.setWindowTitle('Real Time Agro Meter')
+        self.setWindowTitle('Real Time Aggro Meter')
         #self.setStyleSheet('background: black;')
         #self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Tool)
         #self.setAttribute(QtCore.Qt.WA_TranslucentBackground)  # 设置窗口背景透明

@@ -17,7 +17,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>CCHPM -Chain CH Performance Monitor  ---Desinger: Jumo@Kingdom of P1999 Green server</string>
+   <string>CCHPM -Chain CH Performance Monitor</string>
   </property>
   <widget class="QPushButton" name="pushButton">
    <property name="geometry">
@@ -28,6 +28,12 @@
      <height>21</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
    <property name="text">
     <string>OPEN</string>
    </property>
@@ -37,14 +43,14 @@
     <rect>
      <x>20</x>
      <y>30</y>
-     <width>381</width>
+     <width>451</width>
      <height>20</height>
     </rect>
    </property>
    <property name="font">
     <font>
      <family>Arial</family>
-     <pointsize>11</pointsize>
+     <pointsize>9</pointsize>
     </font>
    </property>
    <property name="text">
@@ -60,6 +66,12 @@
      <height>20</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
    <property name="text">
     <string>D:\Everquest\Logs</string>
    </property>
@@ -72,6 +84,12 @@
      <width>701</width>
      <height>71</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>9</pointsize>
+    </font>
    </property>
    <property name="autoFillBackground">
     <bool>true</bool>
@@ -126,7 +144,7 @@
    <property name="font">
     <font>
      <family>Arial</family>
-     <pointsize>11</pointsize>
+     <pointsize>9</pointsize>
     </font>
    </property>
    <item>
@@ -162,7 +180,7 @@
    <property name="font">
     <font>
      <family>Arial</family>
-     <pointsize>11</pointsize>
+     <pointsize>9</pointsize>
     </font>
    </property>
    <property name="text">
@@ -177,6 +195,12 @@
      <width>81</width>
      <height>31</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>9</pointsize>
+    </font>
    </property>
    <property name="text">
     <string>CLEAR</string>
@@ -204,6 +228,12 @@
      <height>141</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>11</pointsize>
+    </font>
+   </property>
    <property name="title">
     <string>Chain CH Performance Monitor Settings</string>
    </property>
@@ -215,6 +245,12 @@
       <width>111</width>
       <height>21</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
     </property>
     <property name="text">
      <string>CH bar height:</string>
@@ -264,6 +300,12 @@
       <height>21</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
     <property name="text">
      <string>Height Margin</string>
     </property>
@@ -293,6 +335,12 @@
       <height>21</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
     <property name="text">
      <string>Width Margin:</string>
     </property>
@@ -305,6 +353,12 @@
       <width>111</width>
       <height>21</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
     </property>
     <property name="text">
      <string>BG COLOR</string>
@@ -351,6 +405,12 @@
       <height>21</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
     <property name="text">
      <string>BAR COLOR</string>
     </property>
@@ -379,6 +439,12 @@
       <width>111</width>
       <height>21</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
     </property>
     <property name="text">
      <string>BG Opacity</string>
@@ -409,6 +475,12 @@
       <height>21</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
     <property name="text">
      <string>BAR Opacity</string>
     </property>
@@ -421,6 +493,12 @@
       <width>41</width>
       <height>21</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
     </property>
     <property name="text">
      <string>Marks</string>
@@ -436,6 +514,12 @@
      <height>31</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
    <property name="text">
     <string>UNLOCK</string>
    </property>
@@ -448,6 +532,12 @@
      <width>81</width>
      <height>31</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>9</pointsize>
+    </font>
    </property>
    <property name="text">
     <string>DEFAULT</string>
@@ -488,6 +578,12 @@
      <height>31</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
    <property name="text">
     <string>Save</string>
    </property>
@@ -500,6 +596,12 @@
      <width>61</width>
      <height>31</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>9</pointsize>
+    </font>
    </property>
    <property name="text">
     <string>Create</string>
@@ -514,6 +616,12 @@
      <height>31</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
    <property name="text">
     <string>Stop</string>
    </property>
@@ -526,6 +634,12 @@
      <width>61</width>
      <height>31</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>9</pointsize>
+    </font>
    </property>
    <property name="text">
     <string>Adapt</string>
@@ -605,6 +719,12 @@
      <height>31</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
    <property name="text">
     <string>HISTORY</string>
    </property>
@@ -621,7 +741,7 @@
    <property name="font">
     <font>
      <family>Arial</family>
-     <pointsize>11</pointsize>
+     <pointsize>9</pointsize>
     </font>
    </property>
    <property name="whatsThis">
@@ -639,6 +759,12 @@
      <width>61</width>
      <height>22</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>11</pointsize>
+    </font>
    </property>
    <property name="whatsThis">
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use !KIn in game to change the CH interval. For this command 'n' should be between 1 to 9 second(s).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -665,7 +791,7 @@
    <property name="font">
     <font>
      <family>Arial</family>
-     <pointsize>11</pointsize>
+     <pointsize>9</pointsize>
     </font>
    </property>
    <property name="text">
@@ -684,7 +810,7 @@
    <property name="font">
     <font>
      <family>Arial</family>
-     <pointsize>11</pointsize>
+     <pointsize>9</pointsize>
     </font>
    </property>
    <property name="text">
@@ -706,7 +832,7 @@
    <property name="font">
     <font>
      <family>Arial</family>
-     <pointsize>11</pointsize>
+     <pointsize>9</pointsize>
     </font>
    </property>
    <property name="editable">
@@ -732,6 +858,12 @@
      <height>21</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
    <property name="text">
     <string>Delete</string>
    </property>
@@ -744,6 +876,12 @@
      <width>61</width>
      <height>21</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>9</pointsize>
+    </font>
    </property>
    <property name="text">
     <string>Add</string>
@@ -761,7 +899,7 @@
    <property name="font">
     <font>
      <family>Arial</family>
-     <pointsize>11</pointsize>
+     <pointsize>8</pointsize>
     </font>
    </property>
    <item>
@@ -789,8 +927,14 @@
      <height>101</height>
     </rect>
    </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>11</pointsize>
+    </font>
+   </property>
    <property name="title">
-    <string>Agro Meter Settings</string>
+    <string>Aggro Meter Settings</string>
    </property>
    <widget class="QLabel" name="label_31">
     <property name="geometry">
@@ -800,6 +944,12 @@
       <width>161</width>
       <height>21</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
     </property>
     <property name="text">
      <string>Message Fade timer(s)</string>
@@ -849,8 +999,14 @@
       <height>21</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
     <property name="text">
-     <string>Lazy Agro timer(min)</string>
+     <string>Lazy Aggro timer(min)</string>
     </property>
    </widget>
    <widget class="QCheckBox" name="checkBox_2">
@@ -865,11 +1021,11 @@
     <property name="font">
      <font>
       <family>Arial</family>
-      <pointsize>11</pointsize>
+      <pointsize>9</pointsize>
      </font>
     </property>
     <property name="text">
-     <string>Enable Agro Meter</string>
+     <string>Enable Aggro Meter</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_13">
@@ -877,24 +1033,24 @@
      <rect>
       <x>10</x>
       <y>60</y>
-      <width>131</width>
+      <width>141</width>
       <height>31</height>
      </rect>
     </property>
     <property name="font">
      <font>
       <family>Arial</family>
-      <pointsize>9</pointsize>
+      <pointsize>8</pointsize>
      </font>
     </property>
     <property name="text">
-     <string>Agro Weapon Editor</string>
+     <string>Aggro Weapon Editor</string>
     </property>
    </widget>
    <widget class="QSpinBox" name="spinBox_13">
     <property name="geometry">
      <rect>
-      <x>620</x>
+      <x>650</x>
       <y>30</y>
       <width>51</width>
       <height>22</height>
@@ -913,11 +1069,17 @@
    <widget class="QLabel" name="label_22">
     <property name="geometry">
      <rect>
-      <x>450</x>
+      <x>460</x>
       <y>30</y>
-      <width>141</width>
+      <width>181</width>
       <height>21</height>
      </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
     </property>
     <property name="text">
      <string>Message Opacity(%)</string>
@@ -926,7 +1088,7 @@
    <widget class="QSpinBox" name="spinBox_14">
     <property name="geometry">
      <rect>
-      <x>620</x>
+      <x>650</x>
       <y>70</y>
       <width>51</width>
       <height>22</height>
@@ -945,14 +1107,20 @@
    <widget class="QLabel" name="label_23">
     <property name="geometry">
      <rect>
-      <x>450</x>
+      <x>460</x>
       <y>70</y>
-      <width>171</width>
+      <width>181</width>
       <height>21</height>
      </rect>
     </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
     <property name="text">
-     <string>MH Swing Rate in DW(‰)</string>
+     <string>Main Hand Swing Rate(‰)</string>
     </property>
    </widget>
   </widget>
@@ -961,18 +1129,37 @@
     <rect>
      <x>20</x>
      <y>180</y>
-     <width>181</width>
+     <width>231</width>
      <height>21</height>
     </rect>
    </property>
    <property name="font">
     <font>
      <family>Arial</family>
-     <pointsize>11</pointsize>
+     <pointsize>9</pointsize>
     </font>
    </property>
    <property name="text">
     <string>Enable CCH Monitor</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label_10">
+   <property name="geometry">
+    <rect>
+     <x>450</x>
+     <y>0</y>
+     <width>361</width>
+     <height>20</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>9</pointsize>
+    </font>
+   </property>
+   <property name="text">
+    <string> ---Desinger: Jumo@Kingdom of P1999 Green server</string>
    </property>
   </widget>
   <zorder>line_6</zorder>
@@ -1009,6 +1196,7 @@
   <zorder>comboBox_3</zorder>
   <zorder>groupBox_3</zorder>
   <zorder>checkBox</zorder>
+  <zorder>label_10</zorder>
  </widget>
  <resources/>
  <connections>
