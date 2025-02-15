@@ -1111,7 +1111,7 @@ class AgroMeter(QWidget):
         if self.weaponDict[self.MHWeapon].procResistMsg!="":
             index=line[26:].find(self.weaponDict[self.MHWeapon].procResistMsg)
             if index==0 or index==1:
-                if self.currentTarget !="":
+                if self.currentTarget in self.agroTableDict:
                     self.agroTableDict[self.currentTarget].ProcCount+=1
                     self.agroTableDict[self.currentTarget].TotalAgro+=self.weaponDict[self.MHWeapon].procAgro
                     self.updateAgroMeter()
@@ -1122,7 +1122,7 @@ class AgroMeter(QWidget):
         if self.weaponDict[self.OHWeapon].procResistMsg!="":
             index=line[26:].find(self.weaponDict[self.OHWeapon].procResistMsg)
             if index==0 or index==1:
-                if self.currentTarget !="":
+                if self.currentTarget in self.agroTableDict:
                     self.agroTableDict[self.currentTarget].ProcCount+=1
                     self.agroTableDict[self.currentTarget].TotalAgro+=self.weaponDict[self.OHWeapon].procAgro
                     self.updateAgroMeter()
@@ -1133,20 +1133,27 @@ class AgroMeter(QWidget):
         if self.currentMHProcLandMessage!="":
             index=line[26:].find(self.currentMHProcLandMessage)
             if index==0 or index==1:
-                self.agroTableDict[self.currentTarget].ProcCount+=1
-                self.agroTableDict[self.currentTarget].TotalAgro+=self.weaponDict[self.MHWeapon].procAgro
-                self.updateAgroMeter()
+                if self.currentTarget in self.agroTableDict:
+                    self.agroTableDict[self.currentTarget].ProcCount+=1
+                    self.agroTableDict[self.currentTarget].TotalAgro+=self.weaponDict[self.MHWeapon].procAgro
+                    self.updateAgroMeter()
+                else:
+                    self.agroToUnknowTarget+=self.weaponDict[self.MHWeapon].procAgro
                 return True
+
+
+
 
         if self.currentOHProcLandMessage!="":
             index=line[26:].find(self.currentOHProcLandMessage)
             if index==0 or index==1:
-                self.agroTableDict[self.currentTarget].ProcCount+=1
-                self.agroTableDict[self.currentTarget].TotalAgro+=self.weaponDict[self.OHWeapon].procAgro
-                self.updateAgroMeter()
+                if self.currentTarget in self.agroTableDict:
+                    self.agroTableDict[self.currentTarget].ProcCount+=1
+                    self.agroTableDict[self.currentTarget].TotalAgro+=self.weaponDict[self.OHWeapon].procAgro
+                    self.updateAgroMeter()
+                else:
+                    self.agroToUnknowTarget+=self.weaponDict[self.OHWeapon].procAgro
                 return True
-
-
 
         return False
 
