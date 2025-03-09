@@ -627,10 +627,12 @@ class AgroMeter(QWidget):
             return
 
         if line[26:]==" Welcome to EverQuest!\n" :    #Cycled back or swapped charactor.
-            self.agroTableDict.clear()
-            self.currentTarget = ""
-            self.anyNewActionDetected = False
-            self.updateAgroMeter()
+
+            self.clearAgroTable()
+
+            if not self.isHide:
+                self.updateAgroMeter()
+
             return
 
 
@@ -662,7 +664,7 @@ class AgroMeter(QWidget):
         self.agroTableDict.clear()
         self.currentTarget = ""
         self.anyNewActionDetected = False
-
+        self.agroToUnknowTarget = 0
 
     def cleansingAgroTableDict(self):
         if self.cleansingTimerExpired:
