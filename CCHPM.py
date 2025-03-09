@@ -12,6 +12,8 @@ import random
 from systemtray import *
 import WeaponEditor
 import resource
+from LogTaker import *
+
 
 #const definition
 SERVERLIST = {"Any": 0, "P1999Green": 1, "project1999": 2, "KingdomDragons": 3}
@@ -34,6 +36,11 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.agroMeter=AgroMeter()
         self.we=WeaponEditor.WeaponEditor()
         self.we.callbackToMain=self
+        self.logTaker = LogTaker()
+        self.ifRALogTakerEnabled=False
+        self.autoPopupRALogTaker=False
+
+
         self.initializing = True
         self.msg('INFO:Initializing configuration.Please wait...')
         self.configdata={}
@@ -90,9 +97,12 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.MHWeapon = self.agroMeter.MHWeapon
         self.OHWeapon = self.agroMeter.OHWeapon
         self.saveconfig()
+
         self.cchwin.close()
         self.agroMeter.close()
         self.we.close()
+        self.logTaker.close()
+
         event.accept()
         QtWidgets.qApp.quit()
 
@@ -106,8 +116,8 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.agroMeter.initializeWeaponBase()
 
     def msg(self,message:str):
-        curr_time = datetime.datetime.now()
-        time_str = datetime.datetime.strftime(curr_time, '%Y-%m-%d %H:%M:%S')
+        curr_time = datetime.now()
+        time_str = datetime.strftime(curr_time, '%Y-%m-%d %H:%M:%S')
         self.label_2.setText('['+time_str+']  '+message)
         #time_str = datetime.datetime.strftime(curr_time, '%Y-%m-%d %H:%M:%S') 这里需要加入显示毫秒，以便后续用于REPLAY。
         with open('CCHPM RUN LOG.txt', 'a',encoding='utf-8') as f:
@@ -143,6 +153,12 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.configdata['agroMeterOpacity']=100
         self.configdata['mainHandSwingRate']=553             #This initial value might not be accurate. Need more test. but close to what it truly is for Warrior.
 
+        self.configdata['ifRALogTakerEnabled'] = True
+        self.configdata['autoPopupRALogTaker'] = False
+        self.configdata['tellWaitingTime']=10                #minute
+        self.configdata["logTakerGeo"] = QtCore.QRect(358, 319, 1167, 587)
+        self.configdata['max_loaded_event']=20               #20 events
+
 
     def initialize_from_configfile(self):
 
@@ -157,107 +173,143 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             self.msg("INFO:CCHPM.ini doesn't exist.Using default configuration")
             self.loaddefaultconfig()
 
-        #to add more attribute and intialize ui by saved settings.
-        self.eqLogDir = self.configdata['eqLogDir']
-        self.lineEdit.setText(self.eqLogDir)
+        try:
 
-        self.serverSlect = self.configdata['serverSlect']
-        self.comboBox.setCurrentIndex(SERVERLIST[self.serverSlect])
+            #to add more attribute and intialize ui by saved settings.
+            self.eqLogDir = self.configdata['eqLogDir']
+            self.lineEdit.setText(self.eqLogDir)
 
-        self.ifautostart = self.configdata['ifautostart']
-        self.started = self.ifautostart
+            self.serverSlect = self.configdata['serverSlect']
+            self.comboBox.setCurrentIndex(SERVERLIST[self.serverSlect])
 
-        self.ifstartCHMonitor=self.configdata['ifstartCHMonitor']
-        self.checkBox.setChecked(self.ifstartCHMonitor)
+            self.ifautostart = self.configdata['ifautostart']
+            self.started = self.ifautostart
 
-        self.mark_pos = self.configdata['mark_pos']
-        self.comboBox_3.setCurrentIndex(POSlIST[self.mark_pos])
-        self.cchwin.mark_pos = self.mark_pos
+            self.ifstartCHMonitor=self.configdata['ifstartCHMonitor']
+            self.checkBox.setChecked(self.ifstartCHMonitor)
+            if self.ifstartCHMonitor:
+                self.checkBox.setStyleSheet("QCheckBox { color: green; }")
+            else:
+                self.checkBox.setStyleSheet("QCheckBox { color: red; }")
 
-        self.chInterval = self.configdata['chInterval']
-        self.spinBox_4.setValue(self.chInterval)
-        self.cchwin.setinterval(self.chInterval)
+            self.mark_pos = self.configdata['mark_pos']
+            self.comboBox_3.setCurrentIndex(POSlIST[self.mark_pos])
+            self.cchwin.mark_pos = self.mark_pos
 
-        self.cchwinGeo=self.configdata['cchwinGeo']
-        self.cchwin.setGeometry(self.cchwinGeo)
+            self.chInterval = self.configdata['chInterval']
+            self.spinBox_4.setValue(self.chInterval)
+            self.cchwin.setinterval(self.chInterval)
 
-        self.railheight=self.configdata['railheight']
-        self.spinBox.setValue(self.railheight)
-        self.cchwin.railheight=self.railheight
+            self.cchwinGeo=self.configdata['cchwinGeo']
+            self.cchwin.setGeometry(self.cchwinGeo)
 
-
-
-        self.logfile_moniter_timer = QTimer(self)
-        self.logfile_moniter_timer.timeout.connect(self.scanCurrentLog)
-
-        self.logfiledir_moniter_timer = QTimer(self)
-        self.logfiledir_moniter_timer.timeout.connect(self.scanLogDir)
-
-        if self.started:
-            self.pushButton_3.setText("ON AIR")
-            self.pushButton_3.setFont(self.font())
-            self.pushButton_3.setStyleSheet('background-color: green;')
-            self.logfile_moniter_timer.start(LOG_MONITORING_INTERVAL)
-            self.logfiledir_moniter_timer.start(LOGDIR_MONITORING_INTERVAL)
-        else:
-            self.pushButton_3.setText("PAUSED")
-            self.pushButton_3.setFont(self.font())
-            self.pushButton_3.setStyleSheet('background-color: red;')
+            self.railheight=self.configdata['railheight']
+            self.spinBox.setValue(self.railheight)
+            self.cchwin.railheight=self.railheight
 
 
-        self.cchwinwidthMargin = self.configdata['cchwinwidthMargin']
-        self.cchwin.widthMargin = self.cchwinwidthMargin
-        self.spinBox_3.setValue(self.cchwinwidthMargin)
 
-        self.cchwinheigthMargin = self.configdata['heigthMargin']
-        self.cchwin.heigthMargin = self.cchwinheigthMargin
-        self.spinBox_2.setValue(self.cchwinheigthMargin)
+            self.logfile_moniter_timer = QTimer(self)
+            self.logfile_moniter_timer.timeout.connect(self.scanCurrentLog)
 
-        self.cfgwin_geo = self.configdata['cfgwin_geo']
-        self.setGeometry(self.cfgwin_geo)
+            self.logfiledir_moniter_timer = QTimer(self)
+            self.logfiledir_moniter_timer.timeout.connect(self.scanLogDir)
 
-        self.hotkeyFormatstr = self.configdata['hotkeyFormatstr']
-        self.hotkeyFormat = self.hotkeyFormatParse(self.hotkeyFormatstr)
-        self.hotkeyFormatList = self.configdata['hotkeyFormatList']
-        self.comboBox_2.clear()
-        for i in range(len(self.hotkeyFormatList)):
-            self.comboBox_2.addItem(self.hotkeyFormatList[i])
-        self.comboBox_2.setCurrentText(self.hotkeyFormatstr)
-        self.comboBox_2.setCurrentIndex(self.comboBox_2.findText(self.hotkeyFormatstr))
-        self.pushButton_12.setEnabled(False)
+            if self.started:
+                self.pushButton_3.setText("ON AIR")
+                self.pushButton_3.setFont(self.font())
+                self.pushButton_3.setStyleSheet('background-color: green;')
+                self.logfile_moniter_timer.start(LOG_MONITORING_INTERVAL)
+                self.logfiledir_moniter_timer.start(LOGDIR_MONITORING_INTERVAL)
+            else:
+                self.pushButton_3.setText("PAUSED")
+                self.pushButton_3.setFont(self.font())
+                self.pushButton_3.setStyleSheet('background-color: red;')
 
 
-        self.msg("INFO:CCHPM finished initialization. Waiting for your order now.")
-        self.cchwin.restart_ani()
-        self.cchwin.reAdjustRails()
+            self.cchwinwidthMargin = self.configdata['cchwinwidthMargin']
+            self.cchwin.widthMargin = self.cchwinwidthMargin
+            self.spinBox_3.setValue(self.cchwinwidthMargin)
 
-        self.agroMeterEnabled = self.configdata['agroMeterEnabled']
-        self.checkBox_2.setChecked(self.agroMeterEnabled)
+            self.cchwinheigthMargin = self.configdata['heigthMargin']
+            self.cchwin.heigthMargin = self.cchwinheigthMargin
+            self.spinBox_2.setValue(self.cchwinheigthMargin)
 
-        self.agroMeterGeo = self.configdata['agroMeterGeo']
-        self.agroMeter.setGeometry(self.agroMeterGeo)
-        self.agroMeter.reAdjustPanel()
-        self.hideAgroMeterInterval=self.configdata['hideAgroMeterInterval']
-        self.spinBox_23.setValue(int(self.hideAgroMeterInterval))
-        self.agroTableExpireDuration=self.configdata['agroTableExpireDuration']
-        self.agroMeter.agroTableExpireDuration=self.agroTableExpireDuration
-        self.spinBox_25.setValue(self.agroTableExpireDuration)
+            self.cfgwin_geo = self.configdata['cfgwin_geo']
+            self.setGeometry(self.cfgwin_geo)
 
-        self.weaponDict = self.configdata['weaponDict']
-        self.MHWeapon="???"
-        self.OHWeapon="???"
-        self.agroMeterOpacity=self.configdata['agroMeterOpacity']
-        self.spinBox_13.setValue(self.agroMeterOpacity)
-        self.agroMeter.label_agroMeterGreen.setWindowOpacity(float(self.agroMeterOpacity)/100)
-        self.agroMeter.label_agroMeterYellow.setWindowOpacity(float(self.agroMeterOpacity) / 100)
-        self.agroMeter.label_errorMessage.setWindowOpacity(float(self.agroMeterOpacity) / 100)
+            self.hotkeyFormatstr = self.configdata['hotkeyFormatstr']
+            self.hotkeyFormat = self.hotkeyFormatParse(self.hotkeyFormatstr)
+            self.hotkeyFormatList = self.configdata['hotkeyFormatList']
+            self.comboBox_2.clear()
+            for i in range(len(self.hotkeyFormatList)):
+                self.comboBox_2.addItem(self.hotkeyFormatList[i])
+            self.comboBox_2.setCurrentText(self.hotkeyFormatstr)
+            self.comboBox_2.setCurrentIndex(self.comboBox_2.findText(self.hotkeyFormatstr))
+            self.pushButton_12.setEnabled(False)
 
-        self.mainHandSwingRate=self.configdata['mainHandSwingRate']
-        self.spinBox_14.setValue(self.mainHandSwingRate)
-        self.agroMeter.basicMHFireRate=float(self.mainHandSwingRate)/1000
-        self.agroMeter.basicOHFireRate=1-self.agroMeter.basicMHFireRate
-        self.agroMeter.setup1hWeaponFireRate()
 
+            self.msg("INFO:CCHPM finished initialization. Waiting for your order now.")
+            self.cchwin.restart_ani()
+            self.cchwin.reAdjustRails()
+
+            self.agroMeterEnabled = self.configdata['agroMeterEnabled']
+            self.checkBox_2.setChecked(self.agroMeterEnabled)
+
+            if self.agroMeterEnabled:
+                self.checkBox_2.setStyleSheet("QCheckBox { color: green; }")
+            else:
+                self.checkBox_2.setStyleSheet("QCheckBox { color: red; }")
+
+            self.agroMeterGeo = self.configdata['agroMeterGeo']
+            self.agroMeter.setGeometry(self.agroMeterGeo)
+            self.agroMeter.reAdjustPanel()
+            self.hideAgroMeterInterval=self.configdata['hideAgroMeterInterval']
+            self.spinBox_23.setValue(int(self.hideAgroMeterInterval))
+            self.agroTableExpireDuration=self.configdata['agroTableExpireDuration']
+            self.agroMeter.agroTableExpireDuration=self.agroTableExpireDuration
+            self.spinBox_25.setValue(self.agroTableExpireDuration)
+
+            self.weaponDict = self.configdata['weaponDict']
+            self.MHWeapon="???"
+            self.OHWeapon="???"
+            self.agroMeterOpacity=self.configdata['agroMeterOpacity']
+            self.spinBox_13.setValue(self.agroMeterOpacity)
+            self.agroMeter.label_agroMeterGreen.setWindowOpacity(float(self.agroMeterOpacity)/100)
+            self.agroMeter.label_agroMeterYellow.setWindowOpacity(float(self.agroMeterOpacity) / 100)
+            self.agroMeter.label_errorMessage.setWindowOpacity(float(self.agroMeterOpacity) / 100)
+
+            self.mainHandSwingRate=self.configdata['mainHandSwingRate']
+            self.spinBox_14.setValue(self.mainHandSwingRate)
+            self.agroMeter.basicMHFireRate=float(self.mainHandSwingRate)/1000
+            self.agroMeter.basicOHFireRate=1-self.agroMeter.basicMHFireRate
+            self.agroMeter.setup1hWeaponFireRate()
+
+            self.ifRALogTakerEnabled=self.configdata['ifRALogTakerEnabled']
+            self.checkBox_3.setChecked(self.ifRALogTakerEnabled)
+
+            if self.ifRALogTakerEnabled:
+                self.checkBox_3.setStyleSheet("QCheckBox { color: green; }")
+            else:
+                self.checkBox_3.setStyleSheet("QCheckBox { color: red; }")
+
+
+
+            self.autoPopupRALogTaker=self.configdata['autoPopupRALogTaker']
+            self.checkBox_4.setChecked(self.autoPopupRALogTaker)
+            self.logTaker.autoPopupRALogTaker = self.autoPopupRALogTaker
+            self.tellWaitingTime=self.configdata['tellWaitingTime']
+            self.spinBox_24.setValue(self.tellWaitingTime)
+            self.logTaker.tellWaitingTime=self.tellWaitingTime
+            self.logTakerGeo= self.configdata["logTakerGeo"]
+            self.logTaker.setGeometry(self.logTakerGeo)
+
+            self.max_loaded_event=self.configdata['max_loaded_event']
+            self.spinBox_27.setValue(self.max_loaded_event)
+            self.logTaker.max_loaded_event_handler(self.max_loaded_event)
+
+        except Exception as e:
+            self.msg(f'ERROR:{str(e)} not found.Using default configuration')
 
 
     def hotkeyFormatParse(self,hotkeyFormatstr:str):
@@ -325,6 +377,13 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.weaponDict[self.yourName]=(self.MHWeapon,self.OHWeapon)
         self.configdata['weaponDict']=self.weaponDict
         self.configdata['mainHandSwingRate']=self.mainHandSwingRate
+
+        self.configdata['ifRALogTakerEnabled']=self.ifRALogTakerEnabled
+        self.configdata['autoPopupRALogTaker']=self.autoPopupRALogTaker
+        self.configdata['tellWaitingTime']=self.tellWaitingTime
+        self.logTakerGeo = self.logTaker.geometry()
+        self.configdata["logTakerGeo"] = self.logTakerGeo
+        self.configdata["max_loaded_event"] = self.max_loaded_event
 
 
         with open('CCHPM.ini', 'wb') as f:
@@ -406,9 +465,11 @@ class CFGWIN(QWidget,Ui_CFGWIN):
                 self.curLogFile=filename
                 self.yourName=self.curLogFile.split("_")[1]
                 self.setWeaponsForYourName()
+
+                self.logTaker.initialize_filters(self.yourName)
+
                 self.msg(f"INFO:Current log file is: {self.curLogFile}")
                 self.logfilechanged = True
-
                 self.lastSizesOfLogFiles = currentSizesOfLogFiles
                 return
 
@@ -446,6 +507,8 @@ class CFGWIN(QWidget,Ui_CFGWIN):
                 self.logProcessor(line)
             if self.agroMeterEnabled == True:
                 self.agroMeter.logProcessor(line)
+            if self.ifRALogTakerEnabled == True:
+                self.logTaker.online_process(line)
             line = self.f.readline()
 
     def logProcessor(self,line:str):
@@ -554,8 +617,10 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.saveconfig()
         if self.ifstartCHMonitor:
             self.msg("INFO:CCHPM is enabled.")
+            self.checkBox.setStyleSheet("QCheckBox { color: green; }")
         else:
             self.msg("INFO:CCHPM is disabled.")
+            self.checkBox.setStyleSheet("QCheckBox { color: red; }")
 
     def agroMeterEnabled(self,agroMeterEnabled:bool):
         if self.initializing:
@@ -566,8 +631,10 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.saveconfig()
         if self.agroMeterEnabled:
             self.msg("INFO:Agro Meter function enabled.")
+            self.checkBox_2.setStyleSheet("QCheckBox { color: green; }")
         else:
             self.msg("INFO:Agro Meter function disabled.")
+            self.checkBox_2.setStyleSheet("QCheckBox { color: red; }")
             self.agroMeter.hide()
             self.agroMeter.hideAgroMeter()
 
@@ -593,6 +660,71 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.MHWeapon = self.agroMeter.MHWeapon
         self.OHWeapon = self.agroMeter.OHWeapon
         self.saveconfig()
+
+
+    def RALogTakerEnabled(self,ifRALogTakerEnabled:bool):
+        if self.initializing:
+            return
+
+        self.ifRALogTakerEnabled=ifRALogTakerEnabled
+
+        self.saveconfig()
+        if self.ifRALogTakerEnabled:
+            self.msg("INFO:Raid attendee log taker function enabled.")
+            self.checkBox_3.setStyleSheet("QCheckBox { color: green; }")
+
+        else:
+            self.msg("INFO:Raid attendee log taker function disabled.")
+            self.checkBox_3.setStyleSheet("QCheckBox { color: red; }")
+            self.logTaker.hide()
+
+
+    def AutoPopupRALogTaker(self,autoPopupRALogTaker:bool):
+        if self.initializing:
+            return
+
+        self.autoPopupRALogTaker=autoPopupRALogTaker
+        self.logTaker.autoPopupRALogTaker = self.autoPopupRALogTaker
+
+        self.saveconfig()
+        if self.autoPopupRALogTaker:
+            self.msg("INFO:Auto pop up the raid attendee log taker window when see !KLOG.")
+        else:
+            self.msg("INFO:No auto pop up for !KLOG. But you can use /t log in game to pop RA Log taker manually still.")
+
+    def tellWaitingTimeHandler(self,minute:int):
+        if self.initializing:
+            return
+
+        self.tellWaitingTime=minute
+        self.logTaker.tellWaitingTime=self.tellWaitingTime
+
+
+        self.saveconfig()
+        self.msg(f"Info: Tells waiting time has changed to {minute}")
+
+
+    def RALogTaker(self):
+
+        self.logTaker.show()
+        self.logTaker.raise_()
+        width=self.logTaker.geometry().getRect()[2]
+        height=self.logTaker.geometry().getRect()[3]
+        self.logTaker.resize(width+1, height)
+        self.logTaker.resize(width, height)
+
+    def historyRAEventToLoadHandler(self,event_count:int):
+
+
+        if self.initializing:
+            return
+
+        self.max_loaded_event=event_count
+        self.logTaker.max_loaded_event_handler(self.max_loaded_event)
+
+        self.saveconfig()
+        self.msg(f"Info: Number of events to load for RA log taker has changed to {event_count}.")
+
 
 
 
