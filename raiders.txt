@@ -628,7 +628,6 @@ Chopsy
 Chopyn
 Chrisajandro
 Chrysomallus
-Chtastic
 Chuck
 Chucki
 Chuckie
@@ -713,7 +712,6 @@ Cuesco
 Cunnive
 Curado
 Cureton
-Curlyfri
 Cursewords
 Cyberdyne
 Cyelkay
@@ -1069,8 +1067,6 @@ Faake
 Faantastic
 Faate
 Fabbiky
-Faction
-Factioned
 Faebreeze
 Faedingpost
 Faend
@@ -1280,7 +1276,6 @@ Genan
 Genius
 Geotusmaga
 Getgud
-Getting
 Gewd
 Ggog
 Ghott

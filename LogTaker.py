@@ -826,6 +826,11 @@ class LogTaker(QMainWindow):
         self.conv_text.clear()
         self.raw_text.setPlainText("\n".join([*event['raw_logs'],"\n##########  Player Notifications  ##########\n",*event.get('raw_tells', [])]))
         self.conv_text.setPlainText("\n".join([*event['raw_logs'],"\n##########  Players to Add/Swap  ##########\n",*event.get('commands', [])]))
+        # 新增代码：滚动到converted logs底部
+        cursor = self.conv_text.textCursor()
+        cursor.movePosition(QTextCursor.End)
+        self.conv_text.setTextCursor(cursor)
+        self.conv_text.ensureCursorVisible()
 
 
     def copy_raw(self):
