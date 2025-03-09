@@ -636,6 +636,7 @@ class AgroMeter(QWidget):
             return
 
 
+
         if line[26:30]==" mh=":                 #use /t mh=weaponname(or alias) to set current main hand weapon.
             tailIndex=line[30:].find(" is not online at this time.")
             if tailIndex!=-1:

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>827</width>
-    <height>526</height>
+    <height>593</height>
    </rect>
   </property>
   <property name="font">
@@ -17,14 +17,14 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>CCHPM -Chain CH Performance Monitor</string>
+   <string>CCHPM v3.01 --Chain CH Performance Monitor</string>
   </property>
   <widget class="QPushButton" name="pushButton">
    <property name="geometry">
     <rect>
-     <x>630</x>
+     <x>490</x>
      <y>50</y>
-     <width>81</width>
+     <width>61</width>
      <height>21</height>
     </rect>
    </property>
@@ -54,7 +54,7 @@
     </font>
    </property>
    <property name="text">
-    <string>Step 1.Setup your Everquest log file's directory below:</string>
+    <string>Setup your Everquest log file's directory below:</string>
    </property>
   </widget>
   <widget class="QLineEdit" name="lineEdit">
@@ -62,7 +62,7 @@
     <rect>
      <x>20</x>
      <y>51</y>
-     <width>601</width>
+     <width>461</width>
      <height>20</height>
     </rect>
    </property>
@@ -80,7 +80,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>440</y>
+     <y>500</y>
      <width>701</width>
      <height>71</height>
     </rect>
@@ -123,7 +123,7 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>420</y>
+     <y>480</y>
      <width>731</width>
      <height>101</height>
     </rect>
@@ -135,8 +135,8 @@
   <widget class="QComboBox" name="comboBox">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>110</y>
+     <x>570</x>
+     <y>50</y>
      <width>151</width>
      <height>22</height>
     </rect>
@@ -171,10 +171,10 @@
   <widget class="QLabel" name="label_3">
    <property name="geometry">
     <rect>
-     <x>20</x>
-     <y>90</y>
-     <width>171</width>
-     <height>16</height>
+     <x>570</x>
+     <y>30</y>
+     <width>151</width>
+     <height>20</height>
     </rect>
    </property>
    <property name="font">
@@ -184,7 +184,7 @@
     </font>
    </property>
    <property name="text">
-    <string>Step 2. Choose server</string>
+    <string>Choose server</string>
    </property>
   </widget>
   <widget class="QPushButton" name="pushButton_2">
@@ -223,9 +223,9 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>150</y>
+     <y>90</y>
      <width>711</width>
-     <height>141</height>
+     <height>171</height>
     </rect>
    </property>
    <property name="font">
@@ -241,7 +241,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>60</y>
+      <y>90</y>
       <width>111</width>
       <height>21</height>
      </rect>
@@ -260,7 +260,7 @@
     <property name="geometry">
      <rect>
       <x>120</x>
-      <y>60</y>
+      <y>90</y>
       <width>42</width>
       <height>22</height>
      </rect>
@@ -279,7 +279,7 @@
     <property name="geometry">
      <rect>
       <x>480</x>
-      <y>60</y>
+      <y>90</y>
       <width>42</width>
       <height>22</height>
      </rect>
@@ -295,7 +295,7 @@
     <property name="geometry">
      <rect>
       <x>370</x>
-      <y>60</y>
+      <y>90</y>
       <width>111</width>
       <height>21</height>
      </rect>
@@ -314,7 +314,7 @@
     <property name="geometry">
      <rect>
       <x>300</x>
-      <y>60</y>
+      <y>90</y>
       <width>42</width>
       <height>22</height>
      </rect>
@@ -330,7 +330,7 @@
     <property name="geometry">
      <rect>
       <x>190</x>
-      <y>60</y>
+      <y>90</y>
       <width>111</width>
       <height>21</height>
      </rect>
@@ -349,7 +349,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>100</y>
+      <y>130</y>
       <width>111</width>
       <height>21</height>
      </rect>
@@ -368,7 +368,7 @@
     <property name="geometry">
      <rect>
       <x>120</x>
-      <y>100</y>
+      <y>130</y>
       <width>42</width>
       <height>22</height>
      </rect>
@@ -384,7 +384,7 @@
     <property name="geometry">
      <rect>
       <x>300</x>
-      <y>100</y>
+      <y>130</y>
       <width>42</width>
       <height>22</height>
      </rect>
@@ -400,7 +400,7 @@
     <property name="geometry">
      <rect>
       <x>190</x>
-      <y>100</y>
+      <y>130</y>
       <width>111</width>
       <height>21</height>
      </rect>
@@ -419,7 +419,7 @@
     <property name="geometry">
      <rect>
       <x>480</x>
-      <y>100</y>
+      <y>130</y>
       <width>42</width>
       <height>22</height>
      </rect>
@@ -435,7 +435,7 @@
     <property name="geometry">
      <rect>
       <x>370</x>
-      <y>100</y>
+      <y>130</y>
       <width>111</width>
       <height>21</height>
      </rect>
@@ -454,7 +454,7 @@
     <property name="geometry">
      <rect>
       <x>660</x>
-      <y>100</y>
+      <y>130</y>
       <width>42</width>
       <height>22</height>
      </rect>
@@ -470,7 +470,7 @@
     <property name="geometry">
      <rect>
       <x>550</x>
-      <y>100</y>
+      <y>130</y>
       <width>111</width>
       <height>21</height>
      </rect>
@@ -489,7 +489,7 @@
     <property name="geometry">
      <rect>
       <x>550</x>
-      <y>60</y>
+      <y>90</y>
       <width>41</width>
       <height>21</height>
      </rect>
@@ -547,7 +547,7 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>140</y>
+     <y>70</y>
      <width>821</width>
      <height>20</height>
     </rect>
@@ -560,7 +560,7 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>410</y>
+     <y>470</y>
      <width>821</width>
      <height>16</height>
     </rect>
@@ -714,7 +714,7 @@
    <property name="geometry">
     <rect>
      <x>740</x>
-     <y>460</y>
+     <y>520</y>
      <width>81</width>
      <height>31</height>
     </rect>
@@ -729,34 +729,12 @@
     <string>HISTORY</string>
    </property>
   </widget>
-  <widget class="QLabel" name="label_8">
-   <property name="geometry">
-    <rect>
-     <x>490</x>
-     <y>110</y>
-     <width>151</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Arial</family>
-     <pointsize>9</pointsize>
-    </font>
-   </property>
-   <property name="whatsThis">
-    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Use !KIn in game to change the CH interval. For this command 'n' should be between 1 to 9 second(s).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-   </property>
-   <property name="text">
-    <string>CH Intervals (second):</string>
-   </property>
-  </widget>
   <widget class="QSpinBox" name="spinBox_4">
    <property name="geometry">
     <rect>
-     <x>650</x>
-     <y>110</y>
-     <width>61</width>
+     <x>660</x>
+     <y>150</y>
+     <width>51</width>
      <height>22</height>
     </rect>
    </property>
@@ -782,9 +760,9 @@
   <widget class="QLabel" name="label_4">
    <property name="geometry">
     <rect>
-     <x>490</x>
-     <y>90</y>
-     <width>231</width>
+     <x>510</x>
+     <y>150</y>
+     <width>151</width>
      <height>21</height>
     </rect>
    </property>
@@ -795,15 +773,15 @@
     </font>
    </property>
    <property name="text">
-    <string>Step 4. Setup CH interval(second)</string>
+    <string>Setup CH Interval(sec)</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_9">
    <property name="geometry">
     <rect>
-     <x>190</x>
-     <y>90</y>
-     <width>191</width>
+     <x>20</x>
+     <y>150</y>
+     <width>111</width>
      <height>20</height>
     </rect>
    </property>
@@ -814,7 +792,7 @@
     </font>
    </property>
    <property name="text">
-    <string>Step 3.Setup CH format</string>
+    <string>Setup CH format</string>
    </property>
   </widget>
   <widget class="QComboBox" name="comboBox_2">
@@ -823,9 +801,9 @@
    </property>
    <property name="geometry">
     <rect>
-     <x>190</x>
-     <y>110</y>
-     <width>211</width>
+     <x>140</x>
+     <y>150</y>
+     <width>231</width>
      <height>22</height>
     </rect>
    </property>
@@ -852,8 +830,8 @@
   <widget class="QPushButton" name="pushButton_11">
    <property name="geometry">
     <rect>
-     <x>410</x>
-     <y>120</y>
+     <x>440</x>
+     <y>150</y>
      <width>61</width>
      <height>21</height>
     </rect>
@@ -871,9 +849,9 @@
   <widget class="QPushButton" name="pushButton_12">
    <property name="geometry">
     <rect>
-     <x>410</x>
-     <y>90</y>
-     <width>61</width>
+     <x>380</x>
+     <y>150</y>
+     <width>51</width>
      <height>21</height>
     </rect>
    </property>
@@ -891,7 +869,7 @@
    <property name="geometry">
     <rect>
      <x>620</x>
-     <y>210</y>
+     <y>180</y>
      <width>91</width>
      <height>22</height>
     </rect>
@@ -922,7 +900,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>300</y>
+     <y>260</y>
      <width>711</width>
      <height>101</height>
     </rect>
@@ -952,17 +930,20 @@
      </font>
     </property>
     <property name="text">
-     <string>Message Fade timer(s)</string>
+     <string>Message Fade timer</string>
     </property>
    </widget>
    <widget class="QSpinBox" name="spinBox_23">
     <property name="geometry">
      <rect>
-      <x>370</x>
+      <x>360</x>
       <y>30</y>
-      <width>51</width>
+      <width>61</width>
       <height>22</height>
      </rect>
+    </property>
+    <property name="suffix">
+     <string>s</string>
     </property>
     <property name="minimum">
      <number>1</number>
@@ -977,11 +958,14 @@
    <widget class="QSpinBox" name="spinBox_25">
     <property name="geometry">
      <rect>
-      <x>371</x>
+      <x>361</x>
       <y>70</y>
-      <width>51</width>
+      <width>61</width>
       <height>22</height>
      </rect>
+    </property>
+    <property name="suffix">
+     <string>min</string>
     </property>
     <property name="minimum">
      <number>1</number>
@@ -1006,7 +990,7 @@
      </font>
     </property>
     <property name="text">
-     <string>Lazy Aggro timer(min)</string>
+     <string>Lazy Aggro timer</string>
     </property>
    </widget>
    <widget class="QCheckBox" name="checkBox_2">
@@ -1050,11 +1034,14 @@
    <widget class="QSpinBox" name="spinBox_13">
     <property name="geometry">
      <rect>
-      <x>650</x>
+      <x>640</x>
       <y>30</y>
-      <width>51</width>
+      <width>61</width>
       <height>22</height>
      </rect>
+    </property>
+    <property name="suffix">
+     <string>%</string>
     </property>
     <property name="minimum">
      <number>0</number>
@@ -1082,17 +1069,20 @@
      </font>
     </property>
     <property name="text">
-     <string>Message Opacity(%)</string>
+     <string>Message Opacity</string>
     </property>
    </widget>
    <widget class="QSpinBox" name="spinBox_14">
     <property name="geometry">
      <rect>
-      <x>650</x>
+      <x>640</x>
       <y>70</y>
-      <width>51</width>
+      <width>61</width>
       <height>22</height>
      </rect>
+    </property>
+    <property name="suffix">
+     <string>‰</string>
     </property>
     <property name="minimum">
      <number>1</number>
@@ -1120,7 +1110,7 @@
      </font>
     </property>
     <property name="text">
-     <string>Main Hand Swing Rate(‰)</string>
+     <string>Main Hand Swing Rate</string>
     </property>
    </widget>
   </widget>
@@ -1128,7 +1118,7 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>180</y>
+     <y>120</y>
      <width>231</width>
      <height>21</height>
     </rect>
@@ -1162,6 +1152,164 @@
     <string> ---Desinger: Jumo@Kingdom of P1999 Green server</string>
    </property>
   </widget>
+  <widget class="QGroupBox" name="groupBox_4">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>370</y>
+     <width>711</width>
+     <height>101</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>11</pointsize>
+    </font>
+   </property>
+   <property name="title">
+    <string>Raid Attendee Log Taker Settings</string>
+   </property>
+   <widget class="QCheckBox" name="checkBox_3">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>181</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Enable RA Log Taker</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_14">
+    <property name="geometry">
+     <rect>
+      <x>510</x>
+      <y>30</y>
+      <width>191</width>
+      <height>51</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Raid Attendance Log Viewer</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_4">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>70</y>
+      <width>201</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Auto Popup after !KLOG</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_32">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>30</y>
+      <width>161</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Tells Waiting Time</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="spinBox_24">
+    <property name="geometry">
+     <rect>
+      <x>360</x>
+      <y>30</y>
+      <width>61</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="suffix">
+     <string>min</string>
+    </property>
+    <property name="minimum">
+     <number>1</number>
+    </property>
+    <property name="maximum">
+     <number>30</number>
+    </property>
+    <property name="value">
+     <number>10</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_34">
+    <property name="geometry">
+     <rect>
+      <x>210</x>
+      <y>70</y>
+      <width>161</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>History RA Event to Load</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="spinBox_27">
+    <property name="geometry">
+     <rect>
+      <x>360</x>
+      <y>70</y>
+      <width>61</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="suffix">
+     <string/>
+    </property>
+    <property name="minimum">
+     <number>0</number>
+    </property>
+    <property name="maximum">
+     <number>50</number>
+    </property>
+    <property name="value">
+     <number>20</number>
+    </property>
+   </widget>
+  </widget>
   <zorder>line_6</zorder>
   <zorder>line_5</zorder>
   <zorder>line_7</zorder>
@@ -1186,7 +1334,6 @@
   <zorder>pushButton_9</zorder>
   <zorder>line_8</zorder>
   <zorder>pushButton_10</zorder>
-  <zorder>label_8</zorder>
   <zorder>spinBox_4</zorder>
   <zorder>label_4</zorder>
   <zorder>label_9</zorder>
@@ -1197,6 +1344,7 @@
   <zorder>groupBox_3</zorder>
   <zorder>checkBox</zorder>
   <zorder>label_10</zorder>
+  <zorder>groupBox_4</zorder>
  </widget>
  <resources/>
  <connections>
@@ -1207,7 +1355,7 @@
    <slot>openlogdir()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>703</x>
+     <x>550</x>
      <y>62</y>
     </hint>
     <hint type="destinationlabel">
@@ -1239,8 +1387,8 @@
    <slot>serverSelect()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>170</x>
-     <y>121</y>
+     <x>720</x>
+     <y>61</y>
     </hint>
     <hint type="destinationlabel">
      <x>149</x>
@@ -1367,8 +1515,8 @@
    <slot>chInterval()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>695</x>
-     <y>123</y>
+     <x>715</x>
+     <y>163</y>
     </hint>
     <hint type="destinationlabel">
      <x>244</x>
@@ -1448,7 +1596,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>786</x>
-     <y>474</y>
+     <y>534</y>
     </hint>
     <hint type="destinationlabel">
      <x>826</x>
@@ -1464,11 +1612,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>184</x>
-     <y>281</y>
+     <y>140</y>
     </hint>
     <hint type="destinationlabel">
      <x>736</x>
-     <y>-45</y>
+     <y>0</y>
     </hint>
    </hints>
   </connection>
@@ -1479,12 +1627,12 @@
    <slot>changeCHFormat()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>332</x>
-     <y>123</y>
+     <x>282</x>
+     <y>163</y>
     </hint>
     <hint type="destinationlabel">
      <x>590</x>
-     <y>-5</y>
+     <y>0</y>
     </hint>
    </hints>
   </connection>
@@ -1495,12 +1643,12 @@
    <slot>deleteCHFormat()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>453</x>
-     <y>131</y>
+     <x>483</x>
+     <y>161</y>
     </hint>
     <hint type="destinationlabel">
      <x>712</x>
-     <y>-13</y>
+     <y>0</y>
     </hint>
    </hints>
   </connection>
@@ -1511,12 +1659,12 @@
    <slot>CHFormatChanged()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>294</x>
-     <y>118</y>
+     <x>244</x>
+     <y>158</y>
     </hint>
     <hint type="destinationlabel">
      <x>540</x>
-     <y>-11</y>
+     <y>0</y>
     </hint>
    </hints>
   </connection>
@@ -1527,12 +1675,12 @@
    <slot>addCHFormat()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>434</x>
-     <y>96</y>
+     <x>404</x>
+     <y>156</y>
     </hint>
     <hint type="destinationlabel">
      <x>421</x>
-     <y>-29</y>
+     <y>0</y>
     </hint>
    </hints>
   </connection>
@@ -1547,7 +1695,7 @@
      <y>195</y>
     </hint>
     <hint type="destinationlabel">
-     <x>859</x>
+     <x>826</x>
      <y>201</y>
     </hint>
    </hints>
@@ -1559,8 +1707,8 @@
    <slot>agroMeterEnabled()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>211</x>
-     <y>309</y>
+     <x>200</x>
+     <y>290</y>
     </hint>
     <hint type="destinationlabel">
      <x>334</x>
@@ -1575,8 +1723,8 @@
    <slot>weaponEditor()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>289</x>
-     <y>314</y>
+     <x>160</x>
+     <y>320</y>
     </hint>
     <hint type="destinationlabel">
      <x>346</x>
@@ -1592,11 +1740,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>413</x>
-     <y>345</y>
+     <y>305</y>
     </hint>
     <hint type="destinationlabel">
      <x>461</x>
-     <y>635</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -1608,11 +1756,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>402</x>
-     <y>383</y>
+     <y>343</y>
     </hint>
     <hint type="destinationlabel">
      <x>434</x>
-     <y>682</y>
+     <y>592</y>
     </hint>
    </hints>
   </connection>
@@ -1623,8 +1771,8 @@
    <slot>agroMeterOpacity()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>647</x>
-     <y>345</y>
+     <x>660</x>
+     <y>305</y>
     </hint>
     <hint type="destinationlabel">
      <x>681</x>
@@ -1639,12 +1787,92 @@
    <slot>setMainHandSwingRate()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>659</x>
-     <y>380</y>
+     <x>660</x>
+     <y>340</y>
     </hint>
     <hint type="destinationlabel">
      <x>697</x>
-     <y>722</y>
+     <y>592</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBox_3</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>CFGWIN</receiver>
+   <slot>RALogTakerEnabled()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>152</x>
+     <y>407</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>212</x>
+     <y>815</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBox_4</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>CFGWIN</receiver>
+   <slot>AutoPopupRALogTaker()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>185</x>
+     <y>448</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>191</x>
+     <y>800</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_14</sender>
+   <signal>clicked()</signal>
+   <receiver>CFGWIN</receiver>
+   <slot>RALogTaker()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>575</x>
+     <y>414</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>670</x>
+     <y>889</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBox_24</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>CFGWIN</receiver>
+   <slot>tellWaitingTimeHandler()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>381</x>
+     <y>412</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>417</x>
+     <y>834</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBox_27</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>CFGWIN</receiver>
+   <slot>historyRAEventToLoadHandler()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>373</x>
+     <y>453</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>391</x>
+     <y>733</y>
     </hint>
    </hints>
   </connection>
@@ -1680,5 +1908,11 @@
   <slot>agroMeterOpacity()</slot>
   <slot>setAgroMeterBackgroundColor()</slot>
   <slot>setMainHandSwingRate()</slot>
+  <slot>RALogTakerEnabled()</slot>
+  <slot>AutoPopupRALogTaker()</slot>
+  <slot>RALogTaker()</slot>
+  <slot>tellWaitingTimeHandler()</slot>
+  <slot>editRALogManually()</slot>
+  <slot>historyRAEventToLoadHandler()</slot>
  </slots>
 </ui>
