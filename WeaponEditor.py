@@ -2,7 +2,7 @@ import sys
 import os
 import configparser
 from PyQt5.QtWidgets import (
-    QApplication, QWidget, QVBoxLayout, QHBoxLayout, QListWidget, QLineEdit, QLabel, QPushButton, QMessageBox
+    QApplication, QWidget, QVBoxLayout, QHBoxLayout, QListWidget, QLineEdit, QLabel, QPushButton, QMessageBox, QCheckBox
 )
 from PyQt5 import QtCore, QtGui, QtWidgets
 #CONST DEFINATION
@@ -28,6 +28,8 @@ class Weapon:
         self.procResistMsg = ""
         self.procLandMsg = ""
         self.currentWeaponType=""
+        self.procDirectDamage = 0          # 默认值0
+        self.procCanAlwaysTakeHold = True  # 默认值True
 
 
 class WeaponEditor(QWidget):
@@ -132,6 +134,22 @@ class WeaponEditor(QWidget):
         right_layout.addWidget(self.proc_land_msg_label)
         right_layout.addWidget(self.proc_land_msg_input)
 
+        # Proc Direct Damage
+        self.proc_direct_damage_label = QLabel("The direct damage of weapon proc effect:")
+        self.proc_direct_damage_input = QLineEdit()
+        right_layout.addWidget(self.proc_direct_damage_label)
+        right_layout.addWidget(self.proc_direct_damage_input)
+
+        # Proc Can Always Take Hold - 修改为水平布局
+        proc_always_layout = QHBoxLayout()
+        self.proc_always_take_hold_label = QLabel("The proc effect CAN always take hold")
+        self.proc_always_take_hold_input = QCheckBox()
+        proc_always_layout.addWidget(self.proc_always_take_hold_input)
+        proc_always_layout.addWidget(self.proc_always_take_hold_label)
+        proc_always_layout.addStretch()  # 添加弹性空间使元素左对齐
+        right_layout.addLayout(proc_always_layout)
+
+
         # 添加/更新按钮
         self.add_button = QPushButton("Add/Update Weapon")
         self.add_button.clicked.connect(self.addOrUpdateWeapon)
@@ -178,6 +196,17 @@ class WeaponEditor(QWidget):
             weapon.procResistMsg = config[section_name]['procResistMsg']
             weapon.procLandMsg = config[section_name]['procLandMsg']
 
+            # 处理新增字段（兼容旧版本）
+            try:
+                weapon.procDirectDamage = int(config[section_name]['procDirectDamage'])
+            except (configparser.NoOptionError, KeyError):
+                weapon.procDirectDamage = 0  # 旧版本默认0
+
+            try:
+                weapon.procCanAlwaysTakeHold = config.getboolean(section_name, 'procCanAlwaysTakeHold')
+            except (configparser.NoOptionError, KeyError):
+                weapon.procCanAlwaysTakeHold = True  # 旧版本默认True
+
             self.weaponDict[weapon.weaponName] = weapon
 
         self.updateWeaponList()
@@ -202,6 +231,9 @@ class WeaponEditor(QWidget):
         self.proc_agro_input.setText(str(weapon.procAgro))
         self.proc_resist_msg_input.setText(weapon.procResistMsg)
         self.proc_land_msg_input.setText(weapon.procLandMsg)
+
+        self.proc_direct_damage_input.setText(str(weapon.procDirectDamage))
+        self.proc_always_take_hold_input.setChecked(weapon.procCanAlwaysTakeHold)
 
     def deleteWeapon(self):
         weapon_name = self.name_input.text().strip()
@@ -259,6 +291,11 @@ class WeaponEditor(QWidget):
         weapon.procResistMsg = self.proc_resist_msg_input.text().strip()
         weapon.procLandMsg = self.proc_land_msg_input.text().strip()
 
+        pddstr = self.proc_direct_damage_input.text().strip()
+        weapon.procDirectDamage = int(pddstr) if pddstr else 0
+        weapon.procCanAlwaysTakeHold = self.proc_always_take_hold_input.isChecked()
+
+
         self.weaponDict[weapon_name] = weapon
         self.updateWeaponList()
         self.saveWeaponsToFile()
@@ -286,7 +323,10 @@ class WeaponEditor(QWidget):
                 'damageBonus': str(weapon.damageBonus),
                 'procAgro': str(weapon.procAgro),
                 'procResistMsg': weapon.procResistMsg,
-                'procLandMsg': weapon.procLandMsg
+                'procLandMsg': weapon.procLandMsg,
+                'procDirectDamage': str(weapon.procDirectDamage),
+                'procCanAlwaysTakeHold': str(weapon.procCanAlwaysTakeHold)
+
             }
 
         with open('weapons.ini', 'w') as configfile:
@@ -303,6 +343,8 @@ class WeaponEditor(QWidget):
         self.proc_agro_input.clear()
         self.proc_resist_msg_input.clear()
         self.proc_land_msg_input.clear()
+        self.proc_direct_damage_input.clear()
+        self.proc_always_take_hold_input.setChecked(True)  # 默认勾选
 
 
 if __name__ == "__main__":

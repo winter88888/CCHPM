@@ -18,11 +18,12 @@ SERVERLIST = {"Any": 0, "P1999Green": 1, "project1999": 2, "KingdomDragons": 3}
 POSlIST = {"On bar":0, "Under bar":1, "Above bar":2}
 LOG_MONITORING_INTERVAL=10 # 10 milliseconds
 LOGDIR_MONITORING_INTERVAL=3000 # 3 seconds
-CCHWIN_MONITORING_INTERVAL=100
+CCHWIN_MONITORING_INTERVAL=100  # 100 milliseconds for garbage collection
 TEST_CHAIN_INTERVAL=1000
-CLEANSING_AGRO_METER_INTERVAL=60       #default is to cleanse agro table dictionary very miniute
+CLEANSING_AGRO_METER_INTERVAL=10        #default is to cleanse agro table dictionary every 10s
 HIDE_AGRO_METER_INTERVAL=60             #default is to hide agro meter if no new agro action in a minute
 AGRO_TABLE_EXPIRE_DURATION= 10          #default is 10 mins for unseen slain msg, hence need to clear that mob.
+ONLINE_SYNC_INTERVAL=100                  #default is to send data to server every 1/10 second.
 
 class CFGWIN(QWidget,Ui_CFGWIN):
     def __init__(self):
@@ -41,6 +42,8 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.lastSizesOfLogFiles={}
         self.curLogFile=''
         self.logfilechanged=False
+        self.blockSequenceNumber=0
+
         self.yourName="none"
         self.f = open('CCHPM RUN LOG.txt','r',encoding='utf-8')
         #self.defaultwindowflags=self.cchwin.windowFlags()
@@ -66,6 +69,7 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.spinBox_10.setEnabled(False)
         self.spinBox_11.setEnabled(False)
         self.spinBox_12.setEnabled(False)
+        self.checkBox_6.setEnabled(False)
 
         self.ti = TrayIcon(self)
         self.ti.show()
@@ -83,9 +87,14 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.hideAgroMeter_timer.timeout.connect(self.agroMeter.hideAgroMeterHandler)
         self.hideAgroMeter_timer.start(self.hideAgroMeterInterval*1000)
 
+        self.onlineSyncHandler_timer = QTimer(self.agroMeter)
+        self.onlineSyncHandler_timer.timeout.connect(self.agroMeter.onlineSyncHandler)
+        if self.agroMeterOnlineSyncEnabled:
+            self.onlineSyncHandler_timer.start(ONLINE_SYNC_INTERVAL)
 
 
     def closeEvent(self,event):
+
         self.cfgwin_geo = self.geometry()
         self.MHWeapon = self.agroMeter.MHWeapon
         self.OHWeapon = self.agroMeter.OHWeapon
@@ -93,6 +102,9 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.cchwin.close()
         self.agroMeter.close()
         self.we.close()
+        self.agroMeter.window_network.close()
+        self.agroMeter.toggle_connection(False)
+
         event.accept()
         QtWidgets.qApp.quit()
 
@@ -127,7 +139,7 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.configdata['ifstartCHMonitor'] = True
         self.configdata['mark_pos'] = 'On bar'
         self.configdata['chInterval'] = 1
-        self.configdata['cchwinGeo'] = QtCore.QRect(586, 669, 528, 126)
+        self.configdata['cchwinGeo'] = QtCore.QRect(586, 669, 358, 126)
         self.configdata['railheight'] = 20
         self.configdata['cchwinwidthMargin'] = 2
         self.configdata['heigthMargin'] = 2
@@ -136,13 +148,18 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.configdata['hotkeyFormatList'] = ['### - CH - tankname','ST ### CH -- tankname']
 
         self.configdata['agroMeterEnabled'] = True
-        self.configdata['agroMeterGeo'] = QtCore.QRect(1188, 654, 372, 155)
+        self.configdata['agroMeterGeo'] = QtCore.QRect(1003, 664, 267, 146)
+        self.configdata['agroNetworkMeterGeo'] = QtCore.QRect(1282, 663, 296, 155)
         self.configdata['hideAgroMeterInterval'] =HIDE_AGRO_METER_INTERVAL
         self.configdata['agroTableExpireDuration'] =AGRO_TABLE_EXPIRE_DURATION
         self.configdata['weaponDict']={"None":("???","???")}
         self.configdata['agroMeterOpacity']=100
-        self.configdata['mainHandSwingRate']=553             #This initial value might not be accurate. Need more test. but close to what it truly is for Warrior.
-
+        self.configdata['mainHandSwingRate']=569             #This initial value might not be accurate. Need more test. but close to what it truly is for Warrior.
+        self.configdata['agroMeterOnlineSyncEnabled'] = True
+        self.configdata['latencyTolerance'] = 100            #+/-100ms tolerance window
+        self.configdata['ifShowEqualDBGBEnabled'] = True
+        self.configdata['ifShowEqualSlowEnabled'] = True
+        self.configdata['ifShowTankDiscEnabled'] =  False
 
     def initialize_from_configfile(self):
 
@@ -157,108 +174,144 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             self.msg("INFO:CCHPM.ini doesn't exist.Using default configuration")
             self.loaddefaultconfig()
 
-        #to add more attribute and intialize ui by saved settings.
-        self.eqLogDir = self.configdata['eqLogDir']
-        self.lineEdit.setText(self.eqLogDir)
 
-        self.serverSlect = self.configdata['serverSlect']
-        self.comboBox.setCurrentIndex(SERVERLIST[self.serverSlect])
+        try:
+            #to add more attribute and intialize ui by saved settings.
+            self.eqLogDir = self.configdata['eqLogDir']
+            self.lineEdit.setText(self.eqLogDir)
 
-        self.ifautostart = self.configdata['ifautostart']
-        self.started = self.ifautostart
+            self.serverSlect = self.configdata['serverSlect']
+            self.comboBox.setCurrentIndex(SERVERLIST[self.serverSlect])
 
-        self.ifstartCHMonitor=self.configdata['ifstartCHMonitor']
-        self.checkBox.setChecked(self.ifstartCHMonitor)
+            self.ifautostart = self.configdata['ifautostart']
+            self.started = self.ifautostart
 
-        self.mark_pos = self.configdata['mark_pos']
-        self.comboBox_3.setCurrentIndex(POSlIST[self.mark_pos])
-        self.cchwin.mark_pos = self.mark_pos
+            self.ifstartCHMonitor=self.configdata['ifstartCHMonitor']
+            self.checkBox.setChecked(self.ifstartCHMonitor)
+            if self.ifstartCHMonitor:
+                self.checkBox.setStyleSheet("QCheckBox { color: green; }")
+            else:
+                self.checkBox.setStyleSheet("QCheckBox { color: red; }")
 
-        self.chInterval = self.configdata['chInterval']
-        self.spinBox_4.setValue(self.chInterval)
-        self.cchwin.setinterval(self.chInterval)
+            self.mark_pos = self.configdata['mark_pos']
+            self.comboBox_3.setCurrentIndex(POSlIST[self.mark_pos])
+            self.cchwin.mark_pos = self.mark_pos
 
-        self.cchwinGeo=self.configdata['cchwinGeo']
-        self.cchwin.setGeometry(self.cchwinGeo)
+            self.chInterval = self.configdata['chInterval']
+            self.spinBox_4.setValue(self.chInterval)
+            self.cchwin.setinterval(self.chInterval)
 
-        self.railheight=self.configdata['railheight']
-        self.spinBox.setValue(self.railheight)
-        self.cchwin.railheight=self.railheight
+            self.cchwinGeo=self.configdata['cchwinGeo']
+            self.cchwin.setGeometry(self.cchwinGeo)
 
-
-
-        self.logfile_moniter_timer = QTimer(self)
-        self.logfile_moniter_timer.timeout.connect(self.scanCurrentLog)
-
-        self.logfiledir_moniter_timer = QTimer(self)
-        self.logfiledir_moniter_timer.timeout.connect(self.scanLogDir)
-
-        if self.started:
-            self.pushButton_3.setText("ON AIR")
-            self.pushButton_3.setFont(self.font())
-            self.pushButton_3.setStyleSheet('background-color: green;')
-            self.logfile_moniter_timer.start(LOG_MONITORING_INTERVAL)
-            self.logfiledir_moniter_timer.start(LOGDIR_MONITORING_INTERVAL)
-        else:
-            self.pushButton_3.setText("PAUSED")
-            self.pushButton_3.setFont(self.font())
-            self.pushButton_3.setStyleSheet('background-color: red;')
+            self.railheight=self.configdata['railheight']
+            self.spinBox.setValue(self.railheight)
+            self.cchwin.railheight=self.railheight
 
 
-        self.cchwinwidthMargin = self.configdata['cchwinwidthMargin']
-        self.cchwin.widthMargin = self.cchwinwidthMargin
-        self.spinBox_3.setValue(self.cchwinwidthMargin)
 
-        self.cchwinheigthMargin = self.configdata['heigthMargin']
-        self.cchwin.heigthMargin = self.cchwinheigthMargin
-        self.spinBox_2.setValue(self.cchwinheigthMargin)
+            self.logfile_moniter_timer = QTimer(self)
+            self.logfile_moniter_timer.timeout.connect(self.scanCurrentLog)
 
-        self.cfgwin_geo = self.configdata['cfgwin_geo']
-        self.setGeometry(self.cfgwin_geo)
+            self.logfiledir_moniter_timer = QTimer(self)
+            self.logfiledir_moniter_timer.timeout.connect(self.scanLogDir)
 
-        self.hotkeyFormatstr = self.configdata['hotkeyFormatstr']
-        self.hotkeyFormat = self.hotkeyFormatParse(self.hotkeyFormatstr)
-        self.hotkeyFormatList = self.configdata['hotkeyFormatList']
-        self.comboBox_2.clear()
-        for i in range(len(self.hotkeyFormatList)):
-            self.comboBox_2.addItem(self.hotkeyFormatList[i])
-        self.comboBox_2.setCurrentText(self.hotkeyFormatstr)
-        self.comboBox_2.setCurrentIndex(self.comboBox_2.findText(self.hotkeyFormatstr))
-        self.pushButton_12.setEnabled(False)
+            if self.started:
+                self.pushButton_3.setText("ON AIR")
+                self.pushButton_3.setFont(self.font())
+                self.pushButton_3.setStyleSheet('background-color: green;')
+                self.logfile_moniter_timer.start(LOG_MONITORING_INTERVAL)
+                self.logfiledir_moniter_timer.start(LOGDIR_MONITORING_INTERVAL)
+            else:
+                self.pushButton_3.setText("PAUSED")
+                self.pushButton_3.setFont(self.font())
+                self.pushButton_3.setStyleSheet('background-color: red;')
 
 
-        self.msg("INFO:CCHPM finished initialization. Waiting for your order now.")
-        self.cchwin.restart_ani()
-        self.cchwin.reAdjustRails()
+            self.cchwinwidthMargin = self.configdata['cchwinwidthMargin']
+            self.cchwin.widthMargin = self.cchwinwidthMargin
+            self.spinBox_3.setValue(self.cchwinwidthMargin)
 
-        self.agroMeterEnabled = self.configdata['agroMeterEnabled']
-        self.checkBox_2.setChecked(self.agroMeterEnabled)
+            self.cchwinheigthMargin = self.configdata['heigthMargin']
+            self.cchwin.heigthMargin = self.cchwinheigthMargin
+            self.spinBox_2.setValue(self.cchwinheigthMargin)
 
-        self.agroMeterGeo = self.configdata['agroMeterGeo']
-        self.agroMeter.setGeometry(self.agroMeterGeo)
-        self.agroMeter.reAdjustPanel()
-        self.hideAgroMeterInterval=self.configdata['hideAgroMeterInterval']
-        self.spinBox_23.setValue(int(self.hideAgroMeterInterval))
-        self.agroTableExpireDuration=self.configdata['agroTableExpireDuration']
-        self.agroMeter.agroTableExpireDuration=self.agroTableExpireDuration
-        self.spinBox_25.setValue(self.agroTableExpireDuration)
+            self.cfgwin_geo = self.configdata['cfgwin_geo']
+            self.setGeometry(self.cfgwin_geo)
 
-        self.weaponDict = self.configdata['weaponDict']
-        self.MHWeapon="???"
-        self.OHWeapon="???"
-        self.agroMeterOpacity=self.configdata['agroMeterOpacity']
-        self.spinBox_13.setValue(self.agroMeterOpacity)
-        self.agroMeter.label_agroMeterGreen.setWindowOpacity(float(self.agroMeterOpacity)/100)
-        self.agroMeter.label_agroMeterYellow.setWindowOpacity(float(self.agroMeterOpacity) / 100)
-        self.agroMeter.label_errorMessage.setWindowOpacity(float(self.agroMeterOpacity) / 100)
-
-        self.mainHandSwingRate=self.configdata['mainHandSwingRate']
-        self.spinBox_14.setValue(self.mainHandSwingRate)
-        self.agroMeter.basicMHFireRate=float(self.mainHandSwingRate)/1000
-        self.agroMeter.basicOHFireRate=1-self.agroMeter.basicMHFireRate
-        self.agroMeter.setup1hWeaponFireRate()
+            self.hotkeyFormatstr = self.configdata['hotkeyFormatstr']
+            self.hotkeyFormat = self.hotkeyFormatParse(self.hotkeyFormatstr)
+            self.hotkeyFormatList = self.configdata['hotkeyFormatList']
+            self.comboBox_2.clear()
+            for i in range(len(self.hotkeyFormatList)):
+                self.comboBox_2.addItem(self.hotkeyFormatList[i])
+            self.comboBox_2.setCurrentText(self.hotkeyFormatstr)
+            self.comboBox_2.setCurrentIndex(self.comboBox_2.findText(self.hotkeyFormatstr))
+            self.pushButton_12.setEnabled(False)
 
 
+            self.msg("INFO:CCHPM finished initialization. Waiting for your order now.")
+            self.cchwin.restart_ani()
+            self.cchwin.reAdjustRails()
+
+            self.agroMeterEnabled = self.configdata['agroMeterEnabled']
+            self.checkBox_2.setChecked(self.agroMeterEnabled)
+
+            if self.agroMeterEnabled:
+                self.checkBox_2.setStyleSheet("QCheckBox { color: green; }")
+            else:
+                self.checkBox_2.setStyleSheet("QCheckBox { color: red; }")
+
+            self.agroMeterGeo = self.configdata['agroMeterGeo']
+            self.agroMeter.setGeometry(self.agroMeterGeo)
+            self.agroNetworkMeterGeo = self.configdata ['agroNetworkMeterGeo']
+            self.agroMeter.window_network.setGeometry(self.agroNetworkMeterGeo)
+            self.agroMeter.reAdjustPanel()
+
+            self.hideAgroMeterInterval=self.configdata['hideAgroMeterInterval']
+            self.spinBox_23.setValue(int(self.hideAgroMeterInterval))
+            self.agroTableExpireDuration=self.configdata['agroTableExpireDuration']
+            self.agroMeter.agroTableExpireDuration=self.agroTableExpireDuration
+            self.spinBox_25.setValue(self.agroTableExpireDuration)
+
+            self.weaponDict = self.configdata['weaponDict']
+            self.MHWeapon="???"
+            self.OHWeapon="???"
+            self.agroMeterOpacity=self.configdata['agroMeterOpacity']
+            self.spinBox_13.setValue(self.agroMeterOpacity)
+            self.agroMeter.label_agroMeterGreen.setWindowOpacity(float(self.agroMeterOpacity)/100)
+            self.agroMeter.label_agroMeterYellow.setWindowOpacity(float(self.agroMeterOpacity) / 100)
+            self.agroMeter.label_errorMessage.setWindowOpacity(float(self.agroMeterOpacity) / 100)
+
+            self.mainHandSwingRate=self.configdata['mainHandSwingRate']
+            self.spinBox_14.setValue(self.mainHandSwingRate)
+            self.agroMeter.basicMHFireRate=float(self.mainHandSwingRate)/1000
+            self.agroMeter.basicOHFireRate=1-self.agroMeter.basicMHFireRate
+            self.agroMeter.setup1hWeaponFireRate()
+
+            self.agroMeterOnlineSyncEnabled = self.configdata['agroMeterOnlineSyncEnabled']
+            self.agroMeter.isOnlineSyncEnabled = self.agroMeterOnlineSyncEnabled
+            self.agroMeter.toggle_connection(self.agroMeterOnlineSyncEnabled)
+            self.checkBox_3.setChecked(self.agroMeterOnlineSyncEnabled)
+
+            self.latencyTolerance=self.configdata['latencyTolerance']
+            self.agroMeter.latencyTolerance=self.latencyTolerance
+            self.spinBox_24.setValue(self.latencyTolerance)
+
+            self.ifShowEqualDBGBEnabled=self.configdata['ifShowEqualDBGBEnabled']
+            self.agroMeter.ifShowEqualDBGBEnabled = self.ifShowEqualDBGBEnabled
+            self.checkBox_4.setChecked(self.ifShowEqualDBGBEnabled)
+
+            self.ifShowEqualSlowEnabled=self.configdata['ifShowEqualSlowEnabled']
+            self.agroMeter.ifShowEqualSlowEnabled=self.ifShowEqualSlowEnabled
+            self.checkBox_5.setChecked(self.ifShowEqualSlowEnabled)
+
+            self.ifShowTankDiscEnabled=self.configdata['ifShowTankDiscEnabled']
+            self.agroMeter.ifShowTankDiscEnabled=self.ifShowTankDiscEnabled
+            self.checkBox_6.setChecked(self.ifShowTankDiscEnabled)
+
+        except Exception as e:
+            self.msg(f'ERROR:{str(e)} not found.Using default configuration')
 
     def hotkeyFormatParse(self,hotkeyFormatstr:str):
         #headkeyword,  ###,middlekeyword,tankname,tailkeyword.
@@ -319,12 +372,19 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.configdata['agroMeterEnabled'] =  self.agroMeterEnabled
         self.agroMeterGeo = self.agroMeter.geometry()
         self.configdata['agroMeterGeo'] = self.agroMeterGeo
+        self.agroNetworkMeterGeo=self.agroMeter.window_network.geometry()
+        self.configdata['agroNetworkMeterGeo'] =self.agroNetworkMeterGeo
         self.configdata["hideAgroMeterInterval"] = self.hideAgroMeterInterval
         self.configdata['agroTableExpireDuration']=self.agroTableExpireDuration
         self.configdata['agroMeterOpacity']=self.agroMeterOpacity
         self.weaponDict[self.yourName]=(self.MHWeapon,self.OHWeapon)
         self.configdata['weaponDict']=self.weaponDict
         self.configdata['mainHandSwingRate']=self.mainHandSwingRate
+        self.configdata['agroMeterOnlineSyncEnabled'] = self.agroMeterOnlineSyncEnabled
+        self.configdata['latencyTolerance'] = self.latencyTolerance
+        self.configdata['ifShowEqualDBGBEnabled'] = self.ifShowEqualDBGBEnabled
+        self.configdata['ifShowEqualSlowEnabled'] = self.ifShowEqualSlowEnabled
+        self.configdata['ifShowTankDiscEnabled'] =  self.ifShowTankDiscEnabled
 
 
         with open('CCHPM.ini', 'wb') as f:
@@ -406,6 +466,7 @@ class CFGWIN(QWidget,Ui_CFGWIN):
                 self.curLogFile=filename
                 self.yourName=self.curLogFile.split("_")[1]
                 self.setWeaponsForYourName()
+                self.setupYourNameToAggroMeter()
                 self.msg(f"INFO:Current log file is: {self.curLogFile}")
                 self.logfilechanged = True
 
@@ -441,11 +502,14 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             self.logfilechanged = False
 
         line=self.f.readline()
+        self.blockSequenceNumber+=1
+        if self.blockSequenceNumber > 4294967196:
+            self.blockSequenceNumber =0
         while(line):
             if self.ifstartCHMonitor == True:
                 self.logProcessor(line)
             if self.agroMeterEnabled == True:
-                self.agroMeter.logProcessor(line)
+                self.agroMeter.logProcessor(line,self.blockSequenceNumber)
             line = self.f.readline()
 
     def logProcessor(self,line:str):
@@ -541,6 +605,9 @@ class CFGWIN(QWidget,Ui_CFGWIN):
 
         self.cchwin.restart_ani()
         self.agroMeter.hideAgroMeter()
+        self.agroMeter.hideAgroMeter()
+        self.agroMeter.hideNetworkAgroMeter()
+        self.agroMeter.hideNetworkAgroMeter()
         self.agroMeter.clearAgroTable()
         self.msg("INFO:Clearing screen. You can also use the in game command /t clearcch to do the same.")
 
@@ -554,22 +621,105 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.saveconfig()
         if self.ifstartCHMonitor:
             self.msg("INFO:CCHPM is enabled.")
+            self.checkBox.setStyleSheet("QCheckBox { color: green; }")
         else:
             self.msg("INFO:CCHPM is disabled.")
+            self.checkBox.setStyleSheet("QCheckBox { color: red; }")
 
-    def agroMeterEnabled(self,agroMeterEnabled:bool):
+
+    def agroMeterEnablingHandler(self,ifAgroMeterEnabled:bool):
         if self.initializing:
             return
 
-        self.agroMeterEnabled=agroMeterEnabled
+        self.agroMeterEnabled=ifAgroMeterEnabled
 
         self.saveconfig()
         if self.agroMeterEnabled:
             self.msg("INFO:Agro Meter function enabled.")
+            self.checkBox_2.setStyleSheet("QCheckBox { color: green; }")
+            self.checkBox_3.setEnabled(True)
+            self.aggroMeterOnlineFuncHandler(True)
+            self.checkBox_3.setChecked(True)
         else:
             self.msg("INFO:Agro Meter function disabled.")
+            self.checkBox_2.setStyleSheet("QCheckBox { color: red; }")
+            self.checkBox_3.setEnabled(False)
+            self.aggroMeterOnlineFuncHandler(False)
+            self.checkBox_3.setChecked(False)
             self.agroMeter.hide()
+            self.agroMeter.window_network.hide()
             self.agroMeter.hideAgroMeter()
+            self.agroMeter.hideAgroMeter()
+            self.agroMeter.hideNetworkAgroMeter()
+            self.agroMeter.hideNetworkAgroMeter()
+
+    def aggroMeterOnlineFuncHandler(self,isOnlineSyncEnabled:bool):
+        if self.initializing:
+            return
+
+        self.agroMeterOnlineSyncEnabled=isOnlineSyncEnabled
+        self.agroMeter.isOnlineSyncEnabled=isOnlineSyncEnabled
+
+        self.saveconfig()
+        if self.agroMeterOnlineSyncEnabled:
+            self.msg("INFO:Agro Meter online synchronisation function enabled.")
+            self.onlineSyncHandler_timer.start(ONLINE_SYNC_INTERVAL)
+            self.agroMeter.toggle_connection(self.agroMeterOnlineSyncEnabled)
+        else:
+            self.msg("INFO:Agro Meter online synchronisation function disabled.")
+            self.onlineSyncHandler_timer.stop()
+            self.agroMeter.toggle_connection(self.agroMeterOnlineSyncEnabled)
+
+    def showEqualDBGBHandler(self,isShowEqualDBGBEnabled:bool):
+        if self.initializing:
+            return
+
+        self.ifShowEqualDBGBEnabled=isShowEqualDBGBEnabled
+        self.agroMeter.ifShowEqualDBGBEnabled=isShowEqualDBGBEnabled
+
+        self.saveconfig()
+        if self.ifShowEqualDBGBEnabled:
+            self.msg("INFO:Agro Meter(online) show equal DB/GB enabled.")
+        else:
+            self.msg("INFO:Agro Meter(online) show equal DB/GB disabled.")
+
+    def showEqualSlowHandler(self,isShowEqualSlowEnabled:bool):
+        if self.initializing:
+            return
+
+        self.ifShowEqualSlowEnabled=isShowEqualSlowEnabled
+        self.agroMeter.ifShowEqualSlowEnabled=isShowEqualSlowEnabled
+
+        self.saveconfig()
+        if self.ifShowEqualSlowEnabled:
+            self.msg("INFO:Agro Meter(online) show equal slow enabled.")
+        else:
+            self.msg("INFO:Agro Meter(online) show equal slow disabled.")
+
+    def showTankDiscHandler(self,isShowTankDiscEnabled:bool):
+        if self.initializing:
+            return
+
+        self.ifShowTankDiscEnabled=isShowTankDiscEnabled
+        self.agroMeter.ifShowTankDiscEnabled=isShowTankDiscEnabled
+
+        self.saveconfig()
+        if self.ifShowEqualDBGBEnabled:
+            self.msg("INFO:Agro Meter(online) show tank disc enabled.")
+        else:
+            self.msg("INFO:Agro Meter(online) show tank disc disabled.")
+
+    def latencyToleranceHandler(self,latencyTolerance:int):
+        if self.initializing:
+            return
+
+        self.latencyTolerance=latencyTolerance
+        self.agroMeter.latencyTolerance=latencyTolerance
+
+        self.saveconfig()
+        self.msg(f"INFO:Changed Aggro Meter's latency tolerance to {latencyTolerance} ms. Note:Turn down this value will"
+                 f" help reduce counting other's proc as yours mistakenly. But will also increase the missing rate of your "
+                 f"own proc. Tune this value based on your network jitter and IO bottleneck ")
 
     def weaponEditor(self):
         #self.we.setWindowFlags(QtCore.Qt.Tool)
@@ -594,6 +744,10 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.OHWeapon = self.agroMeter.OHWeapon
         self.saveconfig()
 
+    def setupYourNameToAggroMeter(self):
+
+        self.agroMeter.setupYourName(self.yourName)
+
 
 
     def startorstop(self):
@@ -605,6 +759,7 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             self.logfile_moniter_timer.stop()
             self.cchwin.restart_ani()
             self.agroMeter.hideAgroMeter()
+            self.agroMeter.hideNetworkAgroMeter()
             self.agroMeter.clearAgroTable()
             self.pushButton_3.setText("PAUSED")
             self.pushButton_3.setFont(self.font())
@@ -655,6 +810,10 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             self.agroMeter.setGeometry(self.agroMeterGeo)
             self.agroMeter.show()
 
+            self.agroMeter.window_network.setWindowOpacity(0.5)
+            self.agroMeter.window_network.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Tool)
+            self.agroMeter.window_network.setGeometry(self.agroNetworkMeterGeo)
+            self.agroMeter.window_network.show()
 
     def modifyMonitorUIdone(self):
 
@@ -684,8 +843,13 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.cchwinAdapt()
 
         self.agroMeter.hide()
-        if self.agroMeterEnabled:
-            self.agroMeter.reAdjustPanel()
+        self.agroMeter.window_network.hide()
+        self.agroMeter.stopTestAgroMeter()
+        self.agroMeter.reAdjustPanel()
+        self.agroMeter.hideAgroMeter()
+        self.agroMeter.hideAgroMeter()
+        self.agroMeter.hideNetworkAgroMeter()
+        self.agroMeter.hideNetworkAgroMeter()
 
     def lockunlock(self):
         if self.locked:
@@ -754,7 +918,7 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.f.close()
         self.f = open('CCHPM RUN LOG.txt',encoding='utf-8')
 
-        self.cchwinGeo=QtCore.QRect(586, 669, 528, 126)
+        self.cchwinGeo=QtCore.QRect(586, 669, 358, 126)
         self.cchwin.setGeometry(self.cchwinGeo)
         self.cchwin.restart_ani()
         self.cchwin.reAdjustRails()
@@ -818,7 +982,7 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             self.agroMeter.agroTableExpireDuration=timer_min
 
         self.saveconfig()
-        self.msg(f"INFO:Chaged lazy agro timer to {timer_min} minutes.")
+        self.msg(f"INFO:Changed lazy agro timer to {timer_min} minutes.")
 
     def setAgroMeterBackgroundColor(self):   #unusing function
         color = QtWidgets.QColorDialog.getColor()  # 打开颜色选择对话框
@@ -915,6 +1079,8 @@ class CFGWIN(QWidget,Ui_CFGWIN):
 
     def openHistoryLog(self):
         os.startfile(".\\CCHPM RUN LOG.txt")
+        os.startfile(".\\AgroMeter RUN LOG.txt")
+        #self.agroMeter.test_reconnect()
 
 if __name__ == "__main__":
 
