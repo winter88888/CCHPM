@@ -920,9 +920,9 @@
    <widget class="QLabel" name="label_31">
     <property name="geometry">
      <rect>
-      <x>320</x>
+      <x>350</x>
       <y>20</y>
-      <width>121</width>
+      <width>101</width>
       <height>21</height>
      </rect>
     </property>
@@ -933,13 +933,13 @@
      </font>
     </property>
     <property name="text">
-     <string>Message Fade timer</string>
+     <string>Message Fade</string>
     </property>
    </widget>
    <widget class="QSpinBox" name="spinBox_23">
     <property name="geometry">
      <rect>
-      <x>450</x>
+      <x>460</x>
       <y>20</y>
       <width>61</width>
       <height>22</height>
@@ -961,7 +961,7 @@
    <widget class="QSpinBox" name="spinBox_25">
     <property name="geometry">
      <rect>
-      <x>250</x>
+      <x>281</x>
       <y>60</y>
       <width>61</width>
       <height>22</height>
@@ -983,9 +983,9 @@
    <widget class="QLabel" name="label_33">
     <property name="geometry">
      <rect>
-      <x>149</x>
+      <x>169</x>
       <y>60</y>
-      <width>101</width>
+      <width>121</width>
       <height>21</height>
      </rect>
     </property>
@@ -996,7 +996,7 @@
      </font>
     </property>
     <property name="text">
-     <string>Lazy Aggro timer</string>
+     <string>Lazy Aggro time</string>
     </property>
    </widget>
    <widget class="QCheckBox" name="checkBox_2">
@@ -1021,9 +1021,9 @@
    <widget class="QSpinBox" name="spinBox_13">
     <property name="geometry">
      <rect>
-      <x>249</x>
+      <x>290</x>
       <y>20</y>
-      <width>61</width>
+      <width>51</width>
       <height>22</height>
      </rect>
     </property>
@@ -1043,9 +1043,9 @@
    <widget class="QLabel" name="label_22">
     <property name="geometry">
      <rect>
-      <x>149</x>
+      <x>169</x>
       <y>20</y>
-      <width>111</width>
+      <width>131</width>
       <height>21</height>
      </rect>
     </property>
@@ -1062,7 +1062,7 @@
    <widget class="QSpinBox" name="spinBox_14">
     <property name="geometry">
      <rect>
-      <x>450</x>
+      <x>460</x>
       <y>60</y>
       <width>61</width>
       <height>22</height>
@@ -1084,9 +1084,9 @@
    <widget class="QLabel" name="label_23">
     <property name="geometry">
      <rect>
-      <x>320</x>
+      <x>350</x>
       <y>60</y>
-      <width>131</width>
+      <width>101</width>
       <height>21</height>
      </rect>
     </property>
@@ -1097,7 +1097,7 @@
      </font>
     </property>
     <property name="text">
-     <string>Main Hand Swing Rate</string>
+     <string>MH Swing Rate</string>
     </property>
    </widget>
    <widget class="QCheckBox" name="checkBox_3">
@@ -1105,7 +1105,7 @@
      <rect>
       <x>10</x>
       <y>100</y>
-      <width>201</width>
+      <width>231</width>
       <height>21</height>
      </rect>
     </property>
@@ -1124,7 +1124,7 @@
      <rect>
       <x>10</x>
       <y>50</y>
-      <width>121</width>
+      <width>141</width>
       <height>31</height>
      </rect>
     </property>
@@ -1141,9 +1141,9 @@
    <widget class="QCheckBox" name="checkBox_4">
     <property name="geometry">
      <rect>
-      <x>220</x>
+      <x>260</x>
       <y>100</y>
-      <width>151</width>
+      <width>171</width>
       <height>21</height>
      </rect>
     </property>
@@ -1160,9 +1160,9 @@
    <widget class="QCheckBox" name="checkBox_5">
     <property name="geometry">
      <rect>
-      <x>380</x>
+      <x>450</x>
       <y>100</y>
-      <width>131</width>
+      <width>161</width>
       <height>21</height>
      </rect>
     </property>
@@ -1176,12 +1176,34 @@
      <string>Show Equal Slow #</string>
     </property>
    </widget>
-   <widget class="QCheckBox" name="checkBox_6">
+   <widget class="QSpinBox" name="spinBox_24">
     <property name="geometry">
      <rect>
-      <x>520</x>
-      <y>100</y>
-      <width>181</width>
+      <x>640</x>
+      <y>20</y>
+      <width>61</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="suffix">
+     <string>ms</string>
+    </property>
+    <property name="minimum">
+     <number>10</number>
+    </property>
+    <property name="maximum">
+     <number>200</number>
+    </property>
+    <property name="value">
+     <number>99</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_32">
+    <property name="geometry">
+     <rect>
+      <x>530</x>
+      <y>20</y>
+      <width>101</width>
       <height>21</height>
      </rect>
     </property>
@@ -1192,7 +1214,7 @@
      </font>
     </property>
     <property name="text">
-     <string>Show Tanks' Disc Duration</string>
+     <string>Latency Range</string>
     </property>
    </widget>
   </widget>
@@ -1234,47 +1256,6 @@
     <string> ---Desinger: Jumo@Kingdom of P1999 Green server</string>
    </property>
   </widget>
-  <widget class="QSpinBox" name="spinBox_24">
-   <property name="geometry">
-    <rect>
-     <x>640</x>
-     <y>280</y>
-     <width>71</width>
-     <height>22</height>
-    </rect>
-   </property>
-   <property name="suffix">
-    <string>ms</string>
-   </property>
-   <property name="minimum">
-    <number>10</number>
-   </property>
-   <property name="maximum">
-    <number>200</number>
-   </property>
-   <property name="value">
-    <number>90</number>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_32">
-   <property name="geometry">
-    <rect>
-     <x>530</x>
-     <y>280</y>
-     <width>101</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="font">
-    <font>
-     <family>Arial</family>
-     <pointsize>9</pointsize>
-    </font>
-   </property>
-   <property name="text">
-    <string>Latency Tolerance</string>
-   </property>
-  </widget>
   <zorder>line_6</zorder>
   <zorder>line_5</zorder>
   <zorder>line_7</zorder>
@@ -1309,8 +1290,6 @@
   <zorder>groupBox_3</zorder>
   <zorder>checkBox</zorder>
   <zorder>label_10</zorder>
-  <zorder>spinBox_24</zorder>
-  <zorder>label_32</zorder>
  </widget>
  <resources/>
  <connections>
@@ -1807,22 +1786,6 @@
     <hint type="destinationlabel">
      <x>435</x>
      <y>762</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>checkBox_6</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>CFGWIN</receiver>
-   <slot>showTankDiscHandler()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>608</x>
-     <y>371</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>638</x>
-     <y>797</y>
     </hint>
    </hints>
   </connection>

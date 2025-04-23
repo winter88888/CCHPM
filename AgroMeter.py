@@ -1168,7 +1168,7 @@ class AgroMeter(QWidget):
         if hitType!=SLASH:
             return False
 
-        self.agroTableDict[self.currentTarget].TotalAgro+=(self.weaponDict[self.MHWeapon].damage+11)*self.realMHFireRate+(self.weaponDict[self.MHWeapon].damage+12)* self.realOHFireRate
+        self.agroTableDict[self.currentTarget].TotalAgro+=(self.weaponDict[self.MHWeapon].damage+11)*self.realMHFireRate+(self.weaponDict[self.OHWeapon].damage+12)* self.realOHFireRate
         # can't tell which is which , so all swings goes to split proportionally.
         self.agroTableDict[self.currentTarget].TiedSwing += 1
         self.agroTableDict[self.currentTarget].MHSwing = int(self.agroTableDict[self.currentTarget].TiedSwing * self.realMHFireRate)
@@ -1264,7 +1264,7 @@ class AgroMeter(QWidget):
         if hitType!=PIERCE:
             return False
 
-        self.agroTableDict[self.currentTarget].TotalAgro+=(self.weaponDict[self.MHWeapon].damage+11)*self.realMHFireRate+(self.weaponDict[self.MHWeapon].damage+12)* self.realOHFireRate
+        self.agroTableDict[self.currentTarget].TotalAgro+=(self.weaponDict[self.MHWeapon].damage+11)*self.realMHFireRate+(self.weaponDict[self.OHWeapon].damage+12)* self.realOHFireRate
         # can't tell which is which , so all swings goes to split proportionally.
         self.agroTableDict[self.currentTarget].TiedSwing += 1
         self.agroTableDict[self.currentTarget].MHSwing = int(self.agroTableDict[self.currentTarget].TiedSwing * self.realMHFireRate)
@@ -1364,7 +1364,7 @@ class AgroMeter(QWidget):
             return False
 
 
-        self.agroTableDict[self.currentTarget].TotalAgro+=(self.weaponDict[self.MHWeapon].damage+11)*self.realMHFireRate+(self.weaponDict[self.MHWeapon].damage+12)* self.realOHFireRate
+        self.agroTableDict[self.currentTarget].TotalAgro+=(self.weaponDict[self.MHWeapon].damage+11)*self.realMHFireRate+(self.weaponDict[self.OHWeapon].damage+12)* self.realOHFireRate
         # can't tell which is which ,so all swings goes to split proportionally.
         self.agroTableDict[self.currentTarget].TiedSwing += 1
         self.agroTableDict[self.currentTarget].MHSwing = int(self.agroTableDict[self.currentTarget].TiedSwing * self.realMHFireRate)
@@ -1466,7 +1466,7 @@ class AgroMeter(QWidget):
             return False
 
 
-        self.agroTableDict[self.currentTarget].TotalAgro+=(self.weaponDict[self.MHWeapon].damage+11)*self.realMHFireRate+(self.weaponDict[self.MHWeapon].damage+12)* self.realOHFireRate
+        self.agroTableDict[self.currentTarget].TotalAgro+=(self.weaponDict[self.MHWeapon].damage+11)*self.realMHFireRate+(self.weaponDict[self.OHWeapon].damage+12)* self.realOHFireRate
         # can't tell which is which , so all swings goes to split equally.
         self.agroTableDict[self.currentTarget].TiedSwing += 1
         self.agroTableDict[self.currentTarget].MHSwing = int(self.agroTableDict[self.currentTarget].TiedSwing * self.realMHFireRate)

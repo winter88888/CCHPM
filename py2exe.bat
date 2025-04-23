@@ -1,1 +1,1 @@
-pyinstaller -F -w CCHPM.py -i CCHPM.ico -n  "CCHPM v2.27"
+pyinstaller -F -w CCHPM.py -i CCHPM.ico -n  "CCHPM v2.28"

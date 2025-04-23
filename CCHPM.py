@@ -69,7 +69,6 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.spinBox_10.setEnabled(False)
         self.spinBox_11.setEnabled(False)
         self.spinBox_12.setEnabled(False)
-        self.checkBox_6.setEnabled(False)
 
         self.ti = TrayIcon(self)
         self.ti.show()
@@ -308,7 +307,7 @@ class CFGWIN(QWidget,Ui_CFGWIN):
 
             self.ifShowTankDiscEnabled=self.configdata['ifShowTankDiscEnabled']
             self.agroMeter.ifShowTankDiscEnabled=self.ifShowTankDiscEnabled
-            self.checkBox_6.setChecked(self.ifShowTankDiscEnabled)
+            #self.checkBox_6.setChecked(self.ifShowTankDiscEnabled)
 
         except Exception as e:
             self.msg(f'ERROR:{str(e)} not found.Using default configuration')
