@@ -208,15 +208,19 @@ class CCHWIN(QWidget):
 
     def nextid(self,tankname:str,clericid:str):
 
+        if not clericid:                                    #added in v3.03 to audit if the ### of CH line is not empty.
+            return "   "
+
         if clericid.upper() == 'R11':
             return "R22"
         if clericid.upper() == 'R22':
             return "R11"
 
-        if clericid == self.anidict[tankname][8][0]:
+        if clericid == self.anidict[tankname][8][0]:        #when 1st ### appears again thats the time we find out who's the last ###.
             self.anidict[tankname][9]=self.anidict[tankname][8][-1]
         if clericid == self.anidict[tankname][9]:
             return self.anidict[tankname][8][0]
+
 
         newid=chr(ord(clericid[0].upper())+1)
         if newid==':':

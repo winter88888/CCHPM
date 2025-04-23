@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>827</width>
-    <height>593</height>
+    <width>830</width>
+    <height>619</height>
    </rect>
   </property>
   <property name="font">
@@ -17,7 +17,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>CCHPM v3.01 --Chain CH Performance Monitor</string>
+   <string>CCHPM v3.05 --Chain CH Performance Monitor</string>
   </property>
   <widget class="QPushButton" name="pushButton">
    <property name="geometry">
@@ -80,7 +80,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>500</y>
+     <y>540</y>
      <width>701</width>
      <height>71</height>
     </rect>
@@ -123,9 +123,9 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>480</y>
+     <y>520</y>
      <width>731</width>
-     <height>101</height>
+     <height>61</height>
     </rect>
    </property>
    <property name="title">
@@ -560,7 +560,7 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>470</y>
+     <y>510</y>
      <width>821</width>
      <height>16</height>
     </rect>
@@ -714,7 +714,7 @@
    <property name="geometry">
     <rect>
      <x>740</x>
-     <y>520</y>
+     <y>560</y>
      <width>81</width>
      <height>31</height>
     </rect>
@@ -902,7 +902,7 @@
      <x>10</x>
      <y>260</y>
      <width>711</width>
-     <height>101</height>
+     <height>131</height>
     </rect>
    </property>
    <property name="font">
@@ -917,9 +917,9 @@
    <widget class="QLabel" name="label_31">
     <property name="geometry">
      <rect>
-      <x>209</x>
-      <y>30</y>
-      <width>161</width>
+      <x>180</x>
+      <y>70</y>
+      <width>101</width>
       <height>21</height>
      </rect>
     </property>
@@ -930,14 +930,14 @@
      </font>
     </property>
     <property name="text">
-     <string>Message Fade timer</string>
+     <string>Message Fade</string>
     </property>
    </widget>
    <widget class="QSpinBox" name="spinBox_23">
     <property name="geometry">
      <rect>
-      <x>360</x>
-      <y>30</y>
+      <x>300</x>
+      <y>70</y>
       <width>61</width>
       <height>22</height>
      </rect>
@@ -958,9 +958,9 @@
    <widget class="QSpinBox" name="spinBox_25">
     <property name="geometry">
      <rect>
-      <x>361</x>
-      <y>70</y>
-      <width>61</width>
+      <x>480</x>
+      <y>30</y>
+      <width>71</width>
       <height>22</height>
      </rect>
     </property>
@@ -973,13 +973,16 @@
     <property name="maximum">
      <number>120</number>
     </property>
+    <property name="value">
+     <number>10</number>
+    </property>
    </widget>
    <widget class="QLabel" name="label_33">
     <property name="geometry">
      <rect>
-      <x>210</x>
-      <y>70</y>
-      <width>151</width>
+      <x>370</x>
+      <y>30</y>
+      <width>111</width>
       <height>21</height>
      </rect>
     </property>
@@ -990,7 +993,7 @@
      </font>
     </property>
     <property name="text">
-     <string>Lazy Aggro timer</string>
+     <string>Lazy Aggro time</string>
     </property>
    </widget>
    <widget class="QCheckBox" name="checkBox_2">
@@ -1015,10 +1018,10 @@
    <widget class="QPushButton" name="pushButton_13">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>60</y>
-      <width>141</width>
-      <height>31</height>
+      <x>580</x>
+      <y>30</y>
+      <width>121</width>
+      <height>61</height>
      </rect>
     </property>
     <property name="font">
@@ -1028,13 +1031,13 @@
      </font>
     </property>
     <property name="text">
-     <string>Aggro Weapon Editor</string>
+     <string>Weapon Editor</string>
     </property>
    </widget>
    <widget class="QSpinBox" name="spinBox_13">
     <property name="geometry">
      <rect>
-      <x>640</x>
+      <x>300</x>
       <y>30</y>
       <width>61</width>
       <height>22</height>
@@ -1056,9 +1059,9 @@
    <widget class="QLabel" name="label_22">
     <property name="geometry">
      <rect>
-      <x>460</x>
+      <x>180</x>
       <y>30</y>
-      <width>181</width>
+      <width>121</width>
       <height>21</height>
      </rect>
     </property>
@@ -1075,9 +1078,9 @@
    <widget class="QSpinBox" name="spinBox_14">
     <property name="geometry">
      <rect>
-      <x>640</x>
+      <x>480</x>
       <y>70</y>
-      <width>61</width>
+      <width>71</width>
       <height>22</height>
      </rect>
     </property>
@@ -1093,13 +1096,16 @@
     <property name="singleStep">
      <number>1</number>
     </property>
+    <property name="value">
+     <number>569</number>
+    </property>
    </widget>
    <widget class="QLabel" name="label_23">
     <property name="geometry">
      <rect>
-      <x>460</x>
+      <x>370</x>
       <y>70</y>
-      <width>181</width>
+      <width>101</width>
       <height>21</height>
      </rect>
     </property>
@@ -1110,7 +1116,105 @@
      </font>
     </property>
     <property name="text">
-     <string>Main Hand Swing Rate</string>
+     <string>MH Swing Rate</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_35">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>70</y>
+      <width>101</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Latency Range</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="spinBox_26">
+    <property name="geometry">
+     <rect>
+      <x>110</x>
+      <y>70</y>
+      <width>61</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="suffix">
+     <string>ms</string>
+    </property>
+    <property name="minimum">
+     <number>10</number>
+    </property>
+    <property name="maximum">
+     <number>200</number>
+    </property>
+    <property name="value">
+     <number>99</number>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_5">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>100</y>
+      <width>231</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Enable Online Synchronisation</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_6">
+    <property name="geometry">
+     <rect>
+      <x>240</x>
+      <y>100</y>
+      <width>171</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Show Equal DB/GB #</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_7">
+    <property name="geometry">
+     <rect>
+      <x>420</x>
+      <y>100</y>
+      <width>161</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Show Equal Slow #</string>
     </property>
    </widget>
   </widget>
@@ -1156,7 +1260,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>370</y>
+     <y>400</y>
      <width>711</width>
      <height>101</height>
     </rect>
@@ -1249,9 +1353,9 @@
    <widget class="QSpinBox" name="spinBox_24">
     <property name="geometry">
      <rect>
-      <x>360</x>
+      <x>380</x>
       <y>30</y>
-      <width>61</width>
+      <width>71</width>
       <height>22</height>
      </rect>
     </property>
@@ -1290,9 +1394,9 @@
    <widget class="QSpinBox" name="spinBox_27">
     <property name="geometry">
      <rect>
-      <x>360</x>
+      <x>380</x>
       <y>70</y>
-      <width>61</width>
+      <width>71</width>
       <height>22</height>
      </rect>
     </property>
@@ -1596,7 +1700,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>786</x>
-     <y>534</y>
+     <y>574</y>
     </hint>
     <hint type="destinationlabel">
      <x>826</x>
@@ -1704,7 +1808,7 @@
    <sender>checkBox_2</sender>
    <signal>toggled(bool)</signal>
    <receiver>CFGWIN</receiver>
-   <slot>agroMeterEnabled()</slot>
+   <slot>agroMeterEnablingHandler()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>200</x>
@@ -1739,7 +1843,7 @@
    <slot>messageFadeTimerChangedHandler()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>413</x>
+     <x>523</x>
      <y>305</y>
     </hint>
     <hint type="destinationlabel">
@@ -1755,7 +1859,7 @@
    <slot>lazyAgroTimerChangedHandler()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>402</x>
+     <x>321</x>
      <y>343</y>
     </hint>
     <hint type="destinationlabel">
@@ -1771,7 +1875,7 @@
    <slot>agroMeterOpacity()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>660</x>
+     <x>310</x>
      <y>305</y>
     </hint>
     <hint type="destinationlabel">
@@ -1787,7 +1891,7 @@
    <slot>setMainHandSwingRate()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>660</x>
+     <x>490</x>
      <y>340</y>
     </hint>
     <hint type="destinationlabel">
@@ -1804,11 +1908,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>152</x>
-     <y>407</y>
+     <y>437</y>
     </hint>
     <hint type="destinationlabel">
      <x>212</x>
-     <y>815</y>
+     <y>618</y>
     </hint>
    </hints>
   </connection>
@@ -1820,11 +1924,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>185</x>
-     <y>448</y>
+     <y>478</y>
     </hint>
     <hint type="destinationlabel">
      <x>191</x>
-     <y>800</y>
+     <y>618</y>
     </hint>
    </hints>
   </connection>
@@ -1836,11 +1940,11 @@
    <hints>
     <hint type="sourcelabel">
      <x>575</x>
-     <y>414</y>
+     <y>444</y>
     </hint>
     <hint type="destinationlabel">
      <x>670</x>
-     <y>889</y>
+     <y>618</y>
     </hint>
    </hints>
   </connection>
@@ -1851,12 +1955,12 @@
    <slot>tellWaitingTimeHandler()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>381</x>
-     <y>412</y>
+     <x>401</x>
+     <y>442</y>
     </hint>
     <hint type="destinationlabel">
      <x>417</x>
-     <y>834</y>
+     <y>618</y>
     </hint>
    </hints>
   </connection>
@@ -1867,12 +1971,76 @@
    <slot>historyRAEventToLoadHandler()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>373</x>
-     <y>453</y>
+     <x>393</x>
+     <y>483</y>
     </hint>
     <hint type="destinationlabel">
      <x>391</x>
-     <y>733</y>
+     <y>618</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBox_26</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>CFGWIN</receiver>
+   <slot>latencyToleranceHandler()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>659</x>
+     <y>304</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>677</x>
+     <y>823</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBox_5</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>CFGWIN</receiver>
+   <slot>aggroMeterOnlineFuncHandler()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>98</x>
+     <y>375</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>108</x>
+     <y>912</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBox_7</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>CFGWIN</receiver>
+   <slot>showEqualSlowHandler()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>553</x>
+     <y>370</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>572</x>
+     <y>833</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBox_6</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>CFGWIN</receiver>
+   <slot>showEqualDBGBHandler()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>285</x>
+     <y>374</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>282</x>
+     <y>814</y>
     </hint>
    </hints>
   </connection>
@@ -1901,7 +2069,6 @@
   <slot>CHFormatChanged()</slot>
   <slot>deleteCHFormat()</slot>
   <slot>markPosition()</slot>
-  <slot>agroMeterEnabled()</slot>
   <slot>weaponEditor()</slot>
   <slot>messageFadeTimerChangedHandler()</slot>
   <slot>lazyAgroTimerChangedHandler()</slot>
@@ -1914,5 +2081,10 @@
   <slot>tellWaitingTimeHandler()</slot>
   <slot>editRALogManually()</slot>
   <slot>historyRAEventToLoadHandler()</slot>
+  <slot>latencyToleranceHandler()</slot>
+  <slot>agroMeterEnablingHandler()</slot>
+  <slot>showEqualSlowHandler()</slot>
+  <slot>showEqualDBGBHandler()</slot>
+  <slot>aggroMeterOnlineFuncHandler()</slot>
  </slots>
 </ui>
