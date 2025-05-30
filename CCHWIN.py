@@ -192,6 +192,16 @@ class CCHWIN(QWidget):
         self.btn.move(width-current_btn_width, 0)
         #print('width',width,'current_btn_width',current_btn_width)
         self.btn.setStyleSheet('QPushButton{border: none; background: green;}')
+        """
+        self.btn.setStyleSheet('''
+            QPushButton {
+                border: none; 
+                background: green;
+                text-align: left;  /* 文本居左 */
+                padding-left: 5px;  /* 添加一些左边距，使文本不紧贴边缘 */
+            }
+        ''')
+        """
         self.btn.setText(clericid)
         self.buttonlist.append(self.btn)
         self.btnText2clericName[clericid]=clericName

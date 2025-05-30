@@ -311,7 +311,7 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             self.agroMeterOnlineSyncEnabled = self.configdata['agroMeterOnlineSyncEnabled']
             self.agroMeter.isOnlineSyncEnabled = self.agroMeterOnlineSyncEnabled
             self.agroMeter.toggle_connection(self.agroMeterOnlineSyncEnabled)
-            self.checkBox_3.setChecked(self.agroMeterOnlineSyncEnabled)
+            self.checkBox_5.setChecked(self.agroMeterOnlineSyncEnabled)
 
             self.latencyTolerance=self.configdata['latencyTolerance']
             self.agroMeter.latencyTolerance=self.latencyTolerance
@@ -319,11 +319,11 @@ class CFGWIN(QWidget,Ui_CFGWIN):
 
             self.ifShowEqualDBGBEnabled=self.configdata['ifShowEqualDBGBEnabled']
             self.agroMeter.ifShowEqualDBGBEnabled = self.ifShowEqualDBGBEnabled
-            self.checkBox_4.setChecked(self.ifShowEqualDBGBEnabled)
+            self.checkBox_6.setChecked(self.ifShowEqualDBGBEnabled)
 
             self.ifShowEqualSlowEnabled=self.configdata['ifShowEqualSlowEnabled']
             self.agroMeter.ifShowEqualSlowEnabled=self.ifShowEqualSlowEnabled
-            self.checkBox_5.setChecked(self.ifShowEqualSlowEnabled)
+            self.checkBox_7.setChecked(self.ifShowEqualSlowEnabled)
 
             self.ifShowTankDiscEnabled=self.configdata['ifShowTankDiscEnabled']
             self.agroMeter.ifShowTankDiscEnabled=self.ifShowTankDiscEnabled
@@ -693,16 +693,16 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         if self.agroMeterEnabled:
             self.msg("INFO:Agro Meter function enabled.")
             self.checkBox_2.setStyleSheet("QCheckBox { color: green; }")
-            self.checkBox_3.setEnabled(True)
+            self.checkBox_5.setEnabled(True)
             self.aggroMeterOnlineFuncHandler(True)
-            self.checkBox_3.setChecked(True)
+            self.checkBox_5.setChecked(True)
 
         else:
             self.msg("INFO:Agro Meter function disabled.")
             self.checkBox_2.setStyleSheet("QCheckBox { color: red; }")
-            self.checkBox_3.setEnabled(False)
+            self.checkBox_5.setEnabled(False)
             self.aggroMeterOnlineFuncHandler(False)
-            self.checkBox_3.setChecked(False)
+            self.checkBox_5.setChecked(False)
             self.agroMeter.hide()
             self.agroMeter.window_network.hide()
             self.agroMeter.hideAgroMeter()

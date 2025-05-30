@@ -1704,6 +1704,13 @@ class AgroMeter(QWidget):
             self.updateAgroMeter()
             return True
 
+        if line[26:]==" Your target is immune to changes in its run speed.\n":    #scepter agro is 400
+            self.agroToUnknownTarget+=400
+            self.anyNewActionDetected = True
+            self.updateAgroMeter()
+            return True
+
+
         return False
 
     def checkRangerSpellEffects(self, line: str):

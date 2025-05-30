@@ -583,7 +583,7 @@ class Ui_CFGWIN(object):
 
     def retranslateUi(self, CFGWIN):
         _translate = QtCore.QCoreApplication.translate
-        CFGWIN.setWindowTitle(_translate("CFGWIN", "CCHPM v3.06 --Chain CH Performance Monitor"))
+        CFGWIN.setWindowTitle(_translate("CFGWIN", "CCHPM v3.08 --Chain CH Performance Monitor"))
         self.pushButton.setText(_translate("CFGWIN", "OPEN"))
         self.label.setText(_translate("CFGWIN", "Setup your Everquest log file\'s directory below:"))
         self.lineEdit.setText(_translate("CFGWIN", "D:\\Everquest\\Logs"))
