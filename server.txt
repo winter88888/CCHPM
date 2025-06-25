@@ -1,0 +1,3 @@
+#User can modify server address using following format(remove the # in front of actuall line)
+#Server=127.0.0.1
+#Port=1111

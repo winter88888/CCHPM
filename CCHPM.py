@@ -35,6 +35,7 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.setFixedSize(self.size())
         self.cchwin = CCHWIN()
         self.agroMeter=AgroMeter()
+        self.agroMeter.callback_to_CCHPM_setOnlineChannel=self.setOnlineChannel
         self.we=WeaponEditor.WeaponEditor()
         self.we.callbackToMain=self
         self.logTaker = LogTaker()
@@ -766,6 +767,24 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         else:
             self.msg("INFO:Agro Meter(online) show tank disc disabled.")
 
+    def setOnlineChannel(self,onlineChannelName:str):
+        if self.initializing:
+            return
+
+        self.onlineChannel=onlineChannelName
+        self.lineEdit_2.setText(onlineChannelName)
+
+        #self.saveconfig()
+        #We want to reset the channel to 'default' every time user restarts CCHPM. So no saving of it.
+        #Then everyone will have a basic channel to make the synch work,need not to worry about losing synch often.
+        #basically the security issue is not common , nothing need to hides most of time. But in the few cases
+        #where aggro ammount does needs to hide, Raid leader can use /gu !kchannel channel_name to change online
+        #aggro broadcasting into a private channel. or use /motd to put it into guild msg , so every time people
+        #relog, they can get it through /get command. no need to spam the !kchannel command over and over.
+
+        self.msg(f"INFO:Aggro Meter online synchronizing channel has been set to [{onlineChannelName}].")
+
+
     def latencyToleranceHandler(self,latencyTolerance:int):
         if self.initializing:
             return
@@ -1008,7 +1027,8 @@ class CFGWIN(QWidget,Ui_CFGWIN):
     def testchain(self):
 
         tankname=random.choice(['Jumo','Balor','Tiggo','Grendol'])
-        clericid=random.choice(['AAA','BBB','CCC','DDD','EEE','FFF','GGG','HHH','III'])
+        clericid=random.choice(["111", "3", "002", "BBB", "5", "004", "AAA", "222","6","GAp","wrong"])
+        #clericid=random.choice(["GAp"])
         self.cchwin.create_ani(tankname,clericid)
 
 

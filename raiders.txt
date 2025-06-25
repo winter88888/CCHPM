@@ -632,6 +632,7 @@ Chuck
 Chucki
 Chuckie
 Chuggen
+Chugsi
 Chunkychunker
 Chyvyn
 Ciggen
@@ -2213,6 +2214,7 @@ Merceyless
 Merciles
 Mercius
 Mereal
+Meriael
 Merlyyn
 Merrow
 Mertha
@@ -3825,6 +3827,7 @@ Vorasoz
 Vorik
 Vorrik
 Vorthok
+Vossdruid
 Voxilious
 Voxillious
 Voxious

@@ -122,6 +122,8 @@ class AgroMeter(QWidget):
         self.ifShowEqualDBGBEnabled = False
         self.ifShowEqualSlowEnabled = False
         self.ifShowTankDiscEnabled = False
+        self.onlineChannel = "default"
+
 
         self.funcCalculateSwingAgro={
             ("???", "???"): self.viewer_mode,
@@ -240,8 +242,7 @@ class AgroMeter(QWidget):
         self.test_timer = QTimer(self)
         self.test_timer.timeout.connect(self.testAgroMeterHandler)
 
-
-
+        self.load_server_address()
         self.initializeWeaponBase()
         self.init_ui()
 
@@ -298,7 +299,25 @@ class AgroMeter(QWidget):
         self.label_network.resize(400, 300)
         self.label_network.hide()
 
+    def load_server_address(self):
+        """从server.txt文件中加载服务器配置"""
+        global AM_SERVER, AM_PORT
 
+        try:
+            if os.path.exists('server.txt'):
+                with open('server.txt', 'r') as f:
+                    for line in f:
+                        line = line.strip()
+                        if line.startswith('Server='):
+                            AM_SERVER = line.split('=')[1].strip()
+                        elif line.startswith('Port='):
+                            try:
+                                AM_PORT = int(line.split('=')[1].strip())
+                            except ValueError:
+                                pass  # 保持默认端口
+        except Exception as e:
+            print(f"读取server.txt文件出错: {e}")
+            # 保持默认服务器和端口
 
     def reAdjustPanel(self):
         self.posx = self.geometry().getRect()[0]
@@ -691,11 +710,13 @@ class AgroMeter(QWidget):
 
             return
 
-        if self.checkClickyEffects(line)==True:
-            return
 
         if self.checkRangerSpellEffects(line) == True:
             return
+
+        if self.checkClickyEffects(line)==True:
+            return
+
 
         if self.checkSkillEffects(line)==True:
             return
@@ -703,6 +724,8 @@ class AgroMeter(QWidget):
         if self.checkDiscStatus(line) == True:
             return
 
+        if self.checkChannelStatus(line) == True:
+            return
 
         #if self.checkAnySeenMobs(line)==True:  #not very needed as for now. skipped
         #    return
@@ -942,8 +965,20 @@ class AgroMeter(QWidget):
         if self.network_thread and self.network_thread.is_alive():
             self.network_thread.send_data(discName,self.yourName, status, time)
         else:
-            self.logErrorMessage("Error:No available connection when trying to send mob_slain to server", "error")
+            self.logErrorMessage("Error:No available connection when trying to send disc update to server", "error")
 
+
+    def send_channel_update(self,channel_name:str):
+        if not self.isOnlineSyncEnabled:
+            return
+
+        if not self.yourName:
+            return
+
+        if self.network_thread and self.network_thread.is_alive():
+            self.network_thread.send_data("channel_update",self.yourName, channel_name, 0)
+        else:
+            self.logErrorMessage("Error:No available connection when trying to send channel update to server", "error")
 
 
 
@@ -1056,9 +1091,10 @@ class AgroMeter(QWidget):
         self.network_thread = NetworkThread(AM_SERVER, AM_PORT)
         self.network_thread.logHandler=self.logErrorMessage
         self.network_thread.on_message_received = self._handle_message
+        self.network_thread.onlineChannel=self.onlineChannel
 
         self.network_thread.start()
-        self.logErrorMessage("Status:Connecting to Imaj's server(44.213.107.109:12345)","info")
+        self.logErrorMessage(f"Status:Connecting to Imaj's server({AM_SERVER}:{AM_PORT})","info")
 
     def _disconnect(self):
         if self.network_thread:
@@ -1771,6 +1807,19 @@ class AgroMeter(QWidget):
             self.updateAgroMeter()
             return True
 
+        if line[26:]==" Your target is immune to changes in its run speed.\n":    #Enveloping Roots check
+            if self.isCastingEnvelopingRoots:        #same key words to scepter ,so need check if casting spell ahead
+                casting_time = (current_time - self.lastEnvelopingRootsCastingStartTime).total_seconds() * 1000
+                if  casting_time < 1750 - self.latencyTolerance or casting_time > 1750 + self.latencyTolerance:
+                    return False
+
+                self.agroToUnknownTarget += 1310  # Enveloping Roots agro is 1310
+                self.isCastingEnvelopingRoots = False
+                self.anyNewActionDetected = True
+                self.updateAgroMeter()
+                return True
+            return False
+
         if line[26:] == " You begin casting Jolt.\n":  # your casting Jolt.
             self.isCastingJolt = True
             self.anyNewActionDetected = True
@@ -1959,6 +2008,26 @@ class AgroMeter(QWidget):
             return True
 
         return False
+
+
+    def checkChannelStatus(self,line:str):
+
+        # in game command is !kchannel channelname , channel name can be a single word or conncected words with underline
+        # example /gu !kchannel Kingdom_Raccoon
+
+        kchannel_pos=line.upper().find('!KCHANNEL=')
+        if kchannel_pos != -1:
+            match=re.search(r"=[\s]*([^\s,.']+)",line[kchannel_pos+9:])
+            if match:
+                self.onlineChannel=match.group(1)
+                self.send_channel_update(self.onlineChannel)
+                self.logErrorMessage(f"Online channel for Aggro Meter has changed to: [{self.onlineChannel}]","error")
+                if hasattr(self,'callback_to_CCHPM_setOnlineChannel'):
+                    self.callback_to_CCHPM_setOnlineChannel(self.onlineChannel)
+                return True
+
+        return False
+
 
     def checkAnySeenMobs(self,line:str):
 

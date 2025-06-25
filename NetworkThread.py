@@ -17,6 +17,8 @@ class NetworkThread(threading.Thread):
         self.handshake_completed = False
         self.socket=None
         self.recv_buffer=b''
+        self.onlineChannel = "default"
+        self.lastCharName = "Unknown"
 
     def logErrorMessage(self,message:str,type:str):
 
@@ -68,6 +70,11 @@ class NetworkThread(threading.Thread):
             self.socket.close()
 
     def send_data(self, type:str,character_name, mob_name, threat_value):
+
+
+        if type=="channel_update":
+            self.onlineChannel = mob_name
+
         self.send_queue.put({
             "type": type,
             "character_name": character_name,
@@ -75,6 +82,16 @@ class NetworkThread(threading.Thread):
             "threat_value": threat_value,
         })
 
+        '''
+        if self.lastCharName != character_name:
+            self.lastCharName = character_name
+            self.send_queue.put({  # to update channel on server side when char name changed. meaningless for now, for future use.
+                "type": "channel_update",
+                "character_name": self.lastCharName,
+                "mobName": self.onlineChannel,
+                "threat_value": 0,
+            })
+        '''
 
     def handle_ready_read(self):
         buffer=bytes()
@@ -106,6 +123,13 @@ class NetworkThread(threading.Thread):
             if data.startswith(b"SERVER:HANDSHAKE_CONFIRMED"):
                 self.logErrorMessage("Handshake confirmation received from server.", "info")
                 self.handshake_completed = True
+                self.send_queue.put({            #to reconfig channel on server side when recover from a disconnection
+                    "type": "channel_update",
+                    "character_name": self.lastCharName,
+                    "mobName": self.onlineChannel,
+                    "threat_value": 0,
+                })
+
                 return
 
             if data.startswith(b"SERVER:HANDSHAKE"):
@@ -157,7 +181,7 @@ class NetworkThread(threading.Thread):
     def send_threat_update(self, type:str, character_name:str, mobName:str, threat_value:int):
         # 检查连接状态（需要根据实际网络库实现状态维护）
         if not self.handshake_completed:
-            self.logErrorMessage("Not connected to server yet when trying to send aggro table.","info")
+            self.logErrorMessage("Not connected to server yet when trying to send message.","info")
             return
 
         '''
@@ -167,7 +191,8 @@ class NetworkThread(threading.Thread):
              So the server side can safely remove the mob entry and his aggro table totally.
         type:threat_update this will be indicating that an aggro table for a mob from the player will be sent to the server.
              So need server to summarize the aggro table from all players then broad cast to all client.
-              
+        type:channel_update this will be indicating which channel the client will be speaking to and listening from server.  
+             So server side can broadcast msg to clients using same channel.              
                 # Construct JSON data structure
                 threat_data = {
                     "type": "clear_all_aggro",
@@ -191,15 +216,28 @@ class NetworkThread(threading.Thread):
                     "mob_name": mobName,
                     "threat": threat_value
                 }
+                
+                # Construct JSON data structure
+                threat_data = {
+                    "type": channel_update,
+                    "channel_name": mobName,
+                }
+                                
         '''
 
         # Construct JSON data structure
-        threat_data = {
-            "type": type,
-            "character": character_name,
-            "mob_name": mobName,
-            "threat": threat_value,
-        }
+        if type == "channel_update":
+            threat_data = {
+                "type": "channel_update",
+                "channel_name": mobName,
+            }
+        else:
+            threat_data = {
+                "type": type,
+                "character": character_name,
+                "mob_name": mobName,
+                "threat": threat_value,
+            }
 
         # 构造JSON数据并编码为字节流
         body = json.dumps(threat_data).encode('utf-8')
@@ -216,7 +254,7 @@ class NetworkThread(threading.Thread):
                     if sent == 0:
                         raise ConnectionError("Socket connection broken")
                     total_sent += sent
-            self.logErrorMessage(f"Aggro table sent: {threat_data}", "info")
+            self.logErrorMessage(f"msg sent: {threat_data}", "info")
 
         except BlockingIOError:
             # 发送缓冲区满抛出BlockingIOError, 直接丢弃，等待下个周期再发，反正每次都是发全量的aggro table。

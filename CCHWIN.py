@@ -3,6 +3,7 @@ import os
 from PyQt5.Qt import *
 from PyQt5.QtCore import QTimer, QDateTime
 from PyQt5 import QtCore, QtGui, QtWidgets
+from ClericIDManager import *
 
 #const definition
 CCHRAILPTR = 0
@@ -10,15 +11,19 @@ ANILISTPTR = 1
 RAILCAPACITY = 20
 
 
-
 class CCHWIN(QWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
         self.btn_counter=0
-        self.anidict= {} # key : tankname, Value[0]: cch rail , Value[1] : animation list of this rail. value[2] : index of railslots
+        self.anidict= {}
+        # key : tankname, Value[0]: cch rail , Value[1] : animation list of this rail. value[2] : index of railslots
+        # value[3]: mt_btn , value[4]:cleric_btn, value[5]:mark rail, value[6]:mark lables, value[7]:bar lables
+        # value[8]: object of cleric ids class, value[9]: last cleric id
+        # initialzied as [cchrail, [], pickedslot, mt_btn, cleric_btn, markrail, marklables, barlables, cleric_ids, '']
         self.buttonlist=[]
         self.btnText2clericName={}
+        self.clericName2v={}
         self.interval=1
         self.railheight=20
         self.markheight=10
@@ -160,9 +165,11 @@ class CCHWIN(QWidget):
         op.setOpacity(1) # 设置透明度的值，0.0到1.0，最小值0是透明，1是不透明
         cleric_btn.setGraphicsEffect(op)
         cleric_btn.show()
+        cleric_btn.move(pos_x+width+self.widthMargin, pos_y)
 
 
-        self.anidict[tankname]= [cchrail,[],pickedslot,mt_btn,cleric_btn,markrail,marklables,barlables,[],'']
+        cleric_ids=ClericIDManager()
+        self.anidict[tankname]= [cchrail,[],pickedslot,mt_btn,cleric_btn,markrail,marklables,barlables,cleric_ids,'',[]]
         return True
 
 
@@ -171,10 +178,13 @@ class CCHWIN(QWidget):
             if not self.__create_cchrail(tankname):
                 print("no enough space to display CH chain for",tankname)
                 return
-        self.anidict[tankname][8].append(clericid)
-        self.anidict[tankname][8].sort()
-        self.anidict[tankname][4].setText(self.nextid(tankname,clericid))
-        if self.you == self.nextid(tankname,clericid):
+        self.anidict[tankname][8].add_id(clericid)
+        next_clericid=self.nextid(tankname,clericid)
+        if next_clericid != "   ":
+            self.anidict[tankname][4].setText(next_clericid)
+            if next_clericid in ("GAp","wrong"):
+                print("gap or wrong")
+        if self.you == next_clericid:
             self.anidict[tankname][4].setStyleSheet('QPushButton{color: gold;border-width: 3px;border-style: solid;border-color: gold;background: purple;}')
         else:
             self.anidict[tankname][4].setStyleSheet('QPushButton{color: none;border: none; background: purple;}')
@@ -203,9 +213,14 @@ class CCHWIN(QWidget):
         ''')
         """
         self.btn.setText(clericid)
+        if clericid.upper() == "GAP":  #make the gap ch bar little transparent. so they won't override main chain.
+            self.btn.setStyleSheet('QPushButton{border: none; background-color: rgba(0, 128, 0, 100);}')
+
+
         self.buttonlist.append(self.btn)
         self.btnText2clericName[clericid]=clericName
         self.btn.show()
+
 
 
         self.animation = QPropertyAnimation(self.btn, b'pos', current_cchrail)
@@ -216,7 +231,30 @@ class CCHWIN(QWidget):
         self.anidict[tankname][ANILISTPTR].append(self.animation)
         self.btn_counter += 1
 
+
+        end_mark = QLabel(self.anidict[tankname][5])
+        end_mark.setText("v")
+        end_mark.resize(10,10)
+        #end_mark.move((1 + 1) * (self.width/10)-5,0)
+        end_mark.setStyleSheet('color: lightblue;')
+        end_mark.show()
+
+        self.clericName2v[clericName]=end_mark
+
+        self.animation = QPropertyAnimation(end_mark, b'pos', self.anidict[tankname][5])
+        self.animation.setKeyValueAt(0, QPoint(width-5, -3))
+        self.animation.setKeyValueAt(1, QPoint(0, -3))
+        self.animation.setDuration(10000) # CH casting time =10s
+        self.animation.start()
+        self.anidict[tankname][10].append(self.animation)
+
+
+
+
+
     def nextid(self,tankname:str,clericid:str):
+
+        sorted_cleric_list=self.anidict[tankname][8].get_sorted_ids()
 
         if not clericid:                                    #added in v3.03 to audit if the ### of CH line is not empty.
             return "   "
@@ -226,19 +264,15 @@ class CCHWIN(QWidget):
         if clericid.upper() == 'R22':
             return "R11"
 
-        if clericid == self.anidict[tankname][8][0]:        #when 1st ### appears again thats the time we find out who's the last ###.
-            self.anidict[tankname][9]=self.anidict[tankname][8][-1]
-        if clericid == self.anidict[tankname][9]:
-            return self.anidict[tankname][8][0]
+        if len(sorted_cleric_list) > 1 :
+            if clericid == sorted_cleric_list[0]:        #when 1st ### appears again thats the time we find out who's the last ###.
+                self.anidict[tankname][9]=sorted_cleric_list[-1]
+            if clericid == self.anidict[tankname][9]:
+                return sorted_cleric_list[0]
 
-
-        newid=chr(ord(clericid[0].upper())+1)
-        if newid==':':
-            newid='0'
-        if newid == '[':
-            newid='A'
-        return newid*3
-
+        newid=self.anidict[tankname][8].predict_next_id(clericid)
+        print(f"in nextid(),tankname:{tankname},clericid:{clericid},newid:{newid}")
+        return newid
 
     def destroy_ani(self):
         for key in self.anidict.keys():
@@ -249,6 +283,13 @@ class CCHWIN(QWidget):
                     self.anidict[key][ANILISTPTR].remove(ani)
                     btn.deleteLater()
                     self.buttonlist.remove(btn)
+
+            for ani in self.anidict[key][10]:
+                if ani.state() == 0:
+                    v = ani.targetObject()
+                    ani.deleteLater()
+                    self.anidict[key][10].remove(ani)
+                    v.deleteLater()
 
         mtnames=list(self.anidict.keys())
         #print('mtlist:',mtnames)
@@ -268,11 +309,26 @@ class CCHWIN(QWidget):
             if btn.text()==self.you:
                 btn.hide()
 
+        if "You" in self.clericName2v:
+            try:
+                self.clericName2v["You"].hide()            # =end_mark.hide()
+            except (RuntimeError, AttributeError):
+                # 捕获对象被销毁或无 hide 方法的情况
+                del self.clericName2v["You"]
+
     def someoneSpellInterrupted(self,clericName:str):
         for btn in self.buttonlist:
             if btn.text() in self.btnText2clericName:
                 if self.btnText2clericName[btn.text()] == clericName:
                     btn.hide()
+
+        if clericName in self.clericName2v:
+            try:
+                self.clericName2v[clericName].hide()            # =end_mark.hide()
+            except (RuntimeError, AttributeError):
+                # 捕获对象被销毁或无 hide 方法的情况
+                del self.clericName2v[clericName]
+
 
 
     def restart_ani(self):

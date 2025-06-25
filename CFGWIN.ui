@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>830</width>
-    <height>619</height>
+    <height>628</height>
    </rect>
   </property>
   <property name="font">
@@ -17,7 +17,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>CCHPM v3.05 --Chain CH Performance Monitor</string>
+   <string>CCHPM v3.11 --Chain CH Performance Monitor</string>
   </property>
   <widget class="QPushButton" name="pushButton">
    <property name="geometry">
@@ -124,8 +124,8 @@
     <rect>
      <x>0</x>
      <y>520</y>
-     <width>731</width>
-     <height>61</height>
+     <width>721</width>
+     <height>101</height>
     </rect>
    </property>
    <property name="title">
@@ -1176,15 +1176,15 @@
      </font>
     </property>
     <property name="text">
-     <string>Enable Online Synchronisation</string>
+     <string>Enable Online Synch</string>
     </property>
    </widget>
    <widget class="QCheckBox" name="checkBox_6">
     <property name="geometry">
      <rect>
-      <x>240</x>
+      <x>180</x>
       <y>100</y>
-      <width>171</width>
+      <width>151</width>
       <height>21</height>
      </rect>
     </property>
@@ -1195,15 +1195,15 @@
      </font>
     </property>
     <property name="text">
-     <string>Show Equal DB/GB #</string>
+     <string>Show Equal DB#</string>
     </property>
    </widget>
    <widget class="QCheckBox" name="checkBox_7">
     <property name="geometry">
      <rect>
-      <x>420</x>
+      <x>320</x>
       <y>100</y>
-      <width>161</width>
+      <width>151</width>
       <height>21</height>
      </rect>
     </property>
@@ -1215,6 +1215,50 @@
     </property>
     <property name="text">
      <string>Show Equal Slow #</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_12">
+    <property name="geometry">
+     <rect>
+      <x>480</x>
+      <y>100</y>
+      <width>101</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Online Channel</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="lineEdit_2">
+    <property name="enabled">
+     <bool>true</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>590</x>
+      <y>100</y>
+      <width>111</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>default</string>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
     </property>
    </widget>
   </widget>
