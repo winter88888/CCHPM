@@ -1,3 +1,12 @@
 #User can modify server address using following format(remove the # in front of actuall line)
 #Server=127.0.0.1
 #Port=1111
+
+#Special target for Wizard to count fluxing aggro. Format is flux_nickName=target_name_in_game(Only Vulak implemented). 
+flux_vulak=Vulak`Aerr
+#flux_rlinf=
+#flux_degta=
+#flux_dktan=
+#flux_sarek=
+#flux_velcra=
+#flux_zed=

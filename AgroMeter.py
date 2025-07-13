@@ -80,6 +80,7 @@ class AgroMeter(QWidget):
         self.weaponDict = {}
         self.agroTableDict={}                      #Key domain mobName:str Value:AgroTable instance
         self.currentTarget=""
+        self.currentSpellTarget = ""
         self.currentMHProcLandMessage=""
         self.currentOHProcLandMessage = ""
         self.cleansingTimerExpired=False
@@ -98,11 +99,17 @@ class AgroMeter(QWidget):
         self.isCastingEnvelopingRoots = False
         self.isCastingJolt = False
         self.isCastingCinderJolt = False
+        self.isCastingFetter = False
+        self.isCastingConcussion = False
+
         self.lastFlameLickCastingStartTime = datetime.datetime.now()
         self.lastEnvelopingRootsCastingStartTime = datetime.datetime.now()
         self.lastJoltCastingStartTime = datetime.datetime.now()
         self.lastCinderJoltCastingStartTime = datetime.datetime.now()
         self.lastBioOrbCastingStartTime = datetime.datetime.now()
+        self.lastFetterCastingStartTime = datetime.datetime.now()
+        self.lastConcussionCastingStartTime = datetime.datetime.now()
+
         self.latencyTolerance = 100   #default latency tolerance is 100ms
         self.agroToUnknownTarget=0
         self.lastNonMeleeDamage = 0
@@ -707,6 +714,8 @@ class AgroMeter(QWidget):
             self.isCastingEnvelopingRoots = False
             self.isCastingJolt = False
             self.isCastingCinderJolt = False
+            self.isCastingFetter = False
+            self.isCastingConcussion = False
 
             return
 
@@ -725,6 +734,9 @@ class AgroMeter(QWidget):
             return
 
         if self.checkChannelStatus(line) == True:
+            return
+
+        if self.checkWizardSpellEffects(line) == True:
             return
 
         #if self.checkAnySeenMobs(line)==True:  #not very needed as for now. skipped
@@ -826,6 +838,7 @@ class AgroMeter(QWidget):
     def clearAgroTable(self):
         self.agroTableDict.clear()
         self.currentTarget = ""
+        self.currentSpellTarget = ""
         self.anyNewActionDetected = False
         self.agroToUnknownTarget = 0
 
@@ -1740,6 +1753,9 @@ class AgroMeter(QWidget):
             self.updateAgroMeter()
             return True
 
+        if self.isCastingFetter or self.isCastingEnvelopingRoots:
+            return False
+
         if line[26:]==" Your target is immune to changes in its run speed.\n":    #scepter agro is 400
             self.agroToUnknownTarget+=400
             self.anyNewActionDetected = True
@@ -1808,16 +1824,20 @@ class AgroMeter(QWidget):
             return True
 
         if line[26:]==" Your target is immune to changes in its run speed.\n":    #Enveloping Roots check
-            if self.isCastingEnvelopingRoots:        #same key words to scepter ,so need check if casting spell ahead
+            if self.isCastingEnvelopingRoots:
+
+                self.isCastingEnvelopingRoots = False
+
+                # same key words to scepter ,so need check if casting spell ahead
                 casting_time = (current_time - self.lastEnvelopingRootsCastingStartTime).total_seconds() * 1000
                 if  casting_time < 1750 - self.latencyTolerance or casting_time > 1750 + self.latencyTolerance:
                     return False
 
                 self.agroToUnknownTarget += 1310  # Enveloping Roots agro is 1310
-                self.isCastingEnvelopingRoots = False
                 self.anyNewActionDetected = True
                 self.updateAgroMeter()
                 return True
+
             return False
 
         if line[26:] == " You begin casting Jolt.\n":  # your casting Jolt.
@@ -1876,6 +1896,138 @@ class AgroMeter(QWidget):
             return True
 
         return False
+
+    def checkWizardSpellEffects(self, line: str):
+
+        current_time=datetime.datetime.now()
+
+        if line[26:] == " You begin casting Fetter.\n":  # your casting Fetter.
+            self.isCastingFetter = True
+            self.anyNewActionDetected = True
+            self.lastFetterCastingStartTime = current_time
+            return True
+
+        index = line.find("'s feet adhere to the ground.\n")
+        if index != -1 and self.isCastingFetter:
+
+            casting_time = (current_time - self.lastFetterCastingStartTime).total_seconds() * 1000
+            if  casting_time <1750-self.latencyTolerance or casting_time > 1750 + self.latencyTolerance:
+                return True
+            self.isCastingFetter = False
+
+            if self.currentSpellTarget == "" or self.currentSpellTarget not in self.agroTableDict:
+                return True
+
+            self.agroTableDict[self.currentSpellTarget].TotalAgro += 1200  # Fetter agro is 1200
+            self.anyNewActionDetected = True
+            self.updateAgroMeter()
+            return True
+
+        if line[26:] == " Your target resisted the Fetter spell.\n":  # your casting Fetter.
+            self.isCastingFetter = False
+
+            if self.currentSpellTarget == "" or self.currentSpellTarget not in self.agroTableDict:
+                return True
+
+            self.agroTableDict[self.currentSpellTarget].TotalAgro += 1200  # Fetter agro is 1200
+            self.anyNewActionDetected = True
+            self.updateAgroMeter()
+            return True
+
+        if line[26:]==" Your target is immune to changes in its run speed.\n":    #Fetter check
+            if self.isCastingFetter:
+                self.isCastingFetter = False
+
+                # same key words to scepter ,so need check if casting spell ahead
+                casting_time = (current_time - self.lastFetterCastingStartTime).total_seconds() * 1000
+                if  casting_time < 1750 - self.latencyTolerance or casting_time > 1750 + self.latencyTolerance:
+                    return False
+
+                if self.currentSpellTarget == "" or self.currentSpellTarget not in self.agroTableDict:
+                    return True
+
+                self.agroTableDict[self.currentSpellTarget].TotalAgro += 1200  # Fetter agro is 1200
+                self.anyNewActionDetected = True
+                self.updateAgroMeter()
+                return True
+            return False
+
+        if line[26:] == " You begin casting Concussion.\n":  # your casting Concussion.
+            self.isCastingConcussion = True
+            self.anyNewActionDetected = True
+            self.lastConcussionCastingStartTime =current_time
+            return True
+
+        index = line.find(" staggers from a blow to the head.\n")
+        if index != -1 and self.isCastingConcussion:
+
+            casting_time = (current_time - self.lastConcussionCastingStartTime).total_seconds() * 1000
+            if  casting_time <2000-self.latencyTolerance or casting_time > 2000 + self.latencyTolerance:
+                return True
+            self.isCastingConcussion = False
+
+
+            if self.currentSpellTarget == "" or self.currentSpellTarget not in self.agroTableDict:
+                return True
+
+            if self.agroTableDict[self.currentSpellTarget].TotalAgro > 400:
+                self.agroTableDict[self.currentSpellTarget].TotalAgro -= 400  # Concussion agro is -400
+            else:
+                self.agroTableDict[self.currentSpellTarget].TotalAgro = 0
+
+            self.anyNewActionDetected = True
+            self.updateAgroMeter()
+            return True
+
+        if line[26:] == " Your target resisted the Concussion spell.\n":  # your casting Concussion.
+
+            self.isCastingConcussion = False
+
+            if self.currentSpellTarget == "" or self.currentSpellTarget not in self.agroTableDict:
+                return True
+
+            if self.agroTableDict[self.currentSpellTarget].TotalAgro > 400:
+                self.agroTableDict[self.currentSpellTarget].TotalAgro -= 400  # Concussion agro is -400
+            else:
+                self.agroTableDict[self.currentSpellTarget].TotalAgro = 0
+
+
+            self.anyNewActionDetected = True
+            self.updateAgroMeter()
+            return True
+
+
+        #Check Flux clicks below
+        #Without /t flux_targetName ahead, there won't be any check for Flux.
+        if self.currentSpellTarget == "" or self.currentSpellTarget not in self.agroTableDict:
+            return False
+
+        if line[26:] == " Your target resisted the LowerElement spell.\n":  # your fluxing.
+            self.agroTableDict[self.currentSpellTarget].TotalAgro += 50  # flux staff agro is 50
+            self.anyNewActionDetected = True
+            self.updateAgroMeter()
+            return True
+
+        if line[26:] == " Your spell did not take hold.\n":  # your fluxing but blocked by OOS/druid spell etc.
+            self.agroTableDict[self.currentSpellTarget].TotalAgro += 50  # flux staff agro is 50
+            self.anyNewActionDetected = True
+            self.updateAgroMeter()
+            return True
+
+        # your or others' fluxing landed on Vulak. Chance is rare but worth reminding other wiz to not Flux on Vulak
+
+        if line[26:] == " Vulak`Aerr looks uncomfortable.\n":
+            self.agroTableDict[self.currentSpellTarget].TotalAgro += 50  # flux staff agro is 50
+            self.anyNewActionDetected = True
+            self.updateAgroMeter()
+            return True
+
+
+
+        return False
+
+
+
 
 
     def checkSkillEffects(self,line:str):
@@ -1951,12 +2103,21 @@ class AgroMeter(QWidget):
         # status=activated/ended/cooling_down
         # time = disc remaining time or disc cooling down time
 
-        # You can use the ability Silentfist Discipline again in 3 minute(s) 57 seconds.
-        if line[26:].startswith(" You can use the ability "):    #Player's disc is cooling down
-            result = re.search(r' Discipline again in (\d{1,2}) minute\(s\) (\d{1,2}) seconds', line)
-            remaining_time = int(result.group(1))*60 + int(result.group(2))
-            self.send_disc_update("disc_cooling_down","any_disc",remaining_time)
-            return True
+        if line[26:].startswith(" You can use the ability "):  # Player's disc is cooling down
+            # 匹配以下两种格式：
+            # 1. "X hour(s) Y minute(s) Z seconds"
+            # 2. "Y minute(s) Z seconds"
+            result = re.search(r' Discipline again in (?:(\d{1,2}) hour\(s\) )?(\d{1,2}) minute\(s\) (\d{1,2}) seconds',
+                               line)
+            if result:
+                hours = int(result.group(1)) if result.group(1) else 0
+                minutes = int(result.group(2))
+                seconds = int(result.group(3))
+                remaining_time = hours * 3600 + minutes * 60 + seconds
+                self.send_disc_update("disc_cooling_down", "any_disc", remaining_time)
+                return True
+
+
 
         if line[26:].startswith(" You return to your normal fighting style.") :    #Player disc ended
             self.send_disc_update("disc_ended","any_disc",0)
@@ -2036,11 +2197,27 @@ class AgroMeter(QWidget):
 
     def checkAndSetCurrentTarget(self,line:str):
 
-        if line[26:43]==" You say, 'Hail, ":    #use ingame hail hotkey to set current target.
+        if line[26:43]==" You say, 'Hail, ":    #use ingame hail hotkey hail to set current target manually.
             self.setCurrentTarget(line[43:-2])
             self.anyNewActionDetected = True
             self.updateAgroMeter()
             return True
+
+        if line[26:32].lower()==" flux_":                 #use /t mh=weaponname(or alias) to set current main hand weapon.
+            tailIndex=line[32:].find(" is not online at this time.")
+            if tailIndex!=-1:
+                spell_target=line[32:32+tailIndex]
+                if spell_target.lower() == "vulak":
+                   self.setCurrentTarget("Vulak`Aerr")
+                   self.currentSpellTarget="Vulak`Aerr"
+                else:
+                   self.currentTarget = ""
+                   self.currentSpellTarget = ""
+                self.anyNewActionDetected = True
+                self.updateAgroMeter()
+            return True
+
+
 
         # index = line.find(" regards you as an ally -- ")
         # if index !=-1:  #use ingame /con hotkey to set current target.         Ally --
@@ -2126,6 +2303,9 @@ class AgroMeter(QWidget):
             self.recompileProcLandMsg(capitalized_mobName)
 
         self.currentTargetTotalAgroSnapshot=self.agroTableDict[self.currentTarget].TotalAgro
+
+        if self.currentTarget!=self.currentSpellTarget:          #目标切换时，清空魔法目标，仅能通过 /t flux_xx设置魔法目标
+            self.currentSpellTarget = ""
 
         if self.isOnlineSyncEnabled:
             self.updateNetworkThreatDisplay()  # 目标切换时刷新显示

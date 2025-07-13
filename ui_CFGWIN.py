@@ -412,7 +412,7 @@ class Ui_CFGWIN(object):
         self.spinBox_26 = QtWidgets.QSpinBox(self.groupBox_3)
         self.spinBox_26.setGeometry(QtCore.QRect(110, 70, 61, 22))
         self.spinBox_26.setMinimum(10)
-        self.spinBox_26.setMaximum(200)
+        self.spinBox_26.setMaximum(500)
         self.spinBox_26.setProperty("value", 99)
         self.spinBox_26.setObjectName("spinBox_26")
         self.checkBox_5 = QtWidgets.QCheckBox(self.groupBox_3)
@@ -599,7 +599,7 @@ class Ui_CFGWIN(object):
 
     def retranslateUi(self, CFGWIN):
         _translate = QtCore.QCoreApplication.translate
-        CFGWIN.setWindowTitle(_translate("CFGWIN", "CCHPM v3.11 --Chain CH Performance Monitor"))
+        CFGWIN.setWindowTitle(_translate("CFGWIN", "CCHPM v3.12 --Chain CH Performance Monitor"))
         self.pushButton.setText(_translate("CFGWIN", "OPEN"))
         self.label.setText(_translate("CFGWIN", "Setup your Everquest log file\'s directory below:"))
         self.lineEdit.setText(_translate("CFGWIN", "D:\\Everquest\\Logs"))

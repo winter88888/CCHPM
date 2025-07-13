@@ -17,7 +17,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>CCHPM v3.11 --Chain CH Performance Monitor</string>
+   <string>CCHPM v3.12 --Chain CH Performance Monitor</string>
   </property>
   <widget class="QPushButton" name="pushButton">
    <property name="geometry">
@@ -1154,7 +1154,7 @@
      <number>10</number>
     </property>
     <property name="maximum">
-     <number>200</number>
+     <number>500</number>
     </property>
     <property name="value">
      <number>99</number>
