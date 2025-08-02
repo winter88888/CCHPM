@@ -4,6 +4,8 @@ import configparser
 from PyQt5.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QHBoxLayout, QListWidget, QLineEdit, QLabel, QPushButton, QMessageBox, QCheckBox
 )
+
+from PyQt5.QtCore import Qt
 from PyQt5 import QtCore, QtGui, QtWidgets
 #CONST DEFINATION
 WEAPON_TYPE={"1hs":0,
@@ -168,6 +170,12 @@ class WeaponEditor(QWidget):
 
         main_layout.addLayout(right_layout)
         self.setLayout(main_layout)
+
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Escape:
+            self.close()
+        super().keyPressEvent(event)
+
 
     def closeEvent(self,event):
 

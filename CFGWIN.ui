@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>830</width>
-    <height>628</height>
+    <width>828</width>
+    <height>690</height>
    </rect>
   </property>
   <property name="font">
@@ -17,7 +17,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>CCHPM v3.12 --Chain CH Performance Monitor</string>
+   <string>CCHPM v3.13 --Chain CH Performance Monitor</string>
   </property>
   <widget class="QPushButton" name="pushButton">
    <property name="geometry">
@@ -80,7 +80,7 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>540</y>
+     <y>610</y>
      <width>701</width>
      <height>71</height>
     </rect>
@@ -123,7 +123,7 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>520</y>
+     <y>590</y>
      <width>721</width>
      <height>101</height>
     </rect>
@@ -560,7 +560,7 @@
    <property name="geometry">
     <rect>
      <x>0</x>
-     <y>510</y>
+     <y>580</y>
      <width>821</width>
      <height>16</height>
     </rect>
@@ -714,7 +714,7 @@
    <property name="geometry">
     <rect>
      <x>740</x>
-     <y>560</y>
+     <y>630</y>
      <width>81</width>
      <height>31</height>
     </rect>
@@ -1340,10 +1340,10 @@
    <widget class="QPushButton" name="pushButton_14">
     <property name="geometry">
      <rect>
-      <x>510</x>
-      <y>30</y>
-      <width>191</width>
-      <height>51</height>
+      <x>580</x>
+      <y>20</y>
+      <width>121</width>
+      <height>61</height>
      </rect>
     </property>
     <property name="font">
@@ -1353,7 +1353,7 @@
      </font>
     </property>
     <property name="text">
-     <string>Raid Attendance Log Viewer</string>
+     <string>RA Log Viewer</string>
     </property>
    </widget>
    <widget class="QCheckBox" name="checkBox_4">
@@ -1397,7 +1397,7 @@
    <widget class="QSpinBox" name="spinBox_24">
     <property name="geometry">
      <rect>
-      <x>380</x>
+      <x>370</x>
       <y>30</y>
       <width>71</width>
       <height>22</height>
@@ -1438,7 +1438,7 @@
    <widget class="QSpinBox" name="spinBox_27">
     <property name="geometry">
      <rect>
-      <x>380</x>
+      <x>370</x>
       <y>70</y>
       <width>71</width>
       <height>22</height>
@@ -1455,6 +1455,85 @@
     </property>
     <property name="value">
      <number>20</number>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_5">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>510</y>
+     <width>711</width>
+     <height>71</height>
+    </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Arial</family>
+     <pointsize>11</pointsize>
+    </font>
+   </property>
+   <property name="title">
+    <string>In-game Discord Bot Command Settings</string>
+   </property>
+   <widget class="QCheckBox" name="checkBox_8">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>291</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Enable In-game Discord Bot Command</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_9">
+    <property name="enabled">
+     <bool>false</bool>
+    </property>
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>30</y>
+      <width>291</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Proxy In-game Discord Cmd for Others</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_15">
+    <property name="geometry">
+     <rect>
+      <x>580</x>
+      <y>10</y>
+      <width>121</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Command Editor</string>
     </property>
    </widget>
   </widget>
@@ -1493,6 +1572,7 @@
   <zorder>checkBox</zorder>
   <zorder>label_10</zorder>
   <zorder>groupBox_4</zorder>
+  <zorder>groupBox_5</zorder>
  </widget>
  <resources/>
  <connections>
@@ -2088,6 +2168,54 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>pushButton_15</sender>
+   <signal>clicked()</signal>
+   <receiver>CFGWIN</receiver>
+   <slot>commandEditorHandler()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>629</x>
+     <y>547</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>633</x>
+     <y>804</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBox_8</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>CFGWIN</receiver>
+   <slot>enableIngameDiscordCommandHandler()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>68</x>
+     <y>552</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>67</x>
+     <y>842</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBox_9</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>CFGWIN</receiver>
+   <slot>enableProxyIngameCommandHandler()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>509</x>
+     <y>554</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>489</x>
+     <y>906</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>openlogdir()</slot>
@@ -2130,5 +2258,8 @@
   <slot>showEqualSlowHandler()</slot>
   <slot>showEqualDBGBHandler()</slot>
   <slot>aggroMeterOnlineFuncHandler()</slot>
+  <slot>commandEditorHandler()</slot>
+  <slot>enableIngameDiscordCommandHandler()</slot>
+  <slot>enableProxyIngameCommandHandler()</slot>
  </slots>
 </ui>

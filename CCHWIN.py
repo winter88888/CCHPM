@@ -182,8 +182,6 @@ class CCHWIN(QWidget):
         next_clericid=self.nextid(tankname,clericid)
         if next_clericid != "   ":
             self.anidict[tankname][4].setText(next_clericid)
-            if next_clericid in ("GAp","wrong"):
-                print("gap or wrong")
         if self.you == next_clericid:
             self.anidict[tankname][4].setStyleSheet('QPushButton{color: gold;border-width: 3px;border-style: solid;border-color: gold;background: purple;}')
         else:
@@ -200,7 +198,7 @@ class CCHWIN(QWidget):
         current_btn_width=width/10*self.interval  #Interval depend on !KIn ,which n = CH interval(second)
         self.btn.resize(current_btn_width, height)
         self.btn.move(width-current_btn_width, 0)
-        #print('width',width,'current_btn_width',current_btn_width)
+
         self.btn.setStyleSheet('QPushButton{border: none; background: green;}')
         """
         self.btn.setStyleSheet('''
@@ -271,7 +269,6 @@ class CCHWIN(QWidget):
                 return sorted_cleric_list[0]
 
         newid=self.anidict[tankname][8].predict_next_id(clericid)
-        print(f"in nextid(),tankname:{tankname},clericid:{clericid},newid:{newid}")
         return newid
 
     def destroy_ani(self):
@@ -292,8 +289,6 @@ class CCHWIN(QWidget):
                     v.deleteLater()
 
         mtnames=list(self.anidict.keys())
-        #print('mtlist:',mtnames)
-        #print(self.railslots)
         for key in mtnames:
             if len(self.anidict[key][ANILISTPTR]) == 0:
                 a=self.anidict.pop(key)
@@ -332,7 +327,7 @@ class CCHWIN(QWidget):
 
 
     def restart_ani(self):
-        print('restarting animations')
+
 
         for key in self.anidict.keys():
             for ani in self.anidict[key][ANILISTPTR]:
@@ -340,7 +335,7 @@ class CCHWIN(QWidget):
         self.destroy_ani()
 
     def reAdjustRails(self):
-        #print('adjusting cch rails',self.geometry())
+
         self.posx = self.geometry().getRect()[0]
         self.posy = self.geometry().getRect()[1]
         self.width = self.geometry().getRect()[2]
@@ -358,25 +353,25 @@ class CCHWIN(QWidget):
             self.railslots[i] = ['FREE', self.height - (self.railheight + self.heigthMargin+self.markheight) * (i + 1)]
 
     def pause_ani(self):
-        print('trying to pause animations')
+
         for name in self.anidict.keys():
             for i in self.anidict[name][ANILISTPTR]:
                 i.pause()
 
 
     def resume_ani(self):
-        print('trying to resume animations')
+
         for name in self.anidict.keys():
             for i in self.anidict[name][ANILISTPTR]:
                 i.resume()
 
     def hide_cch_rails(self):
-        print('trying to hide CCH rails')
+
         for name in self.anidict.keys():
             self.anidict[name][CCHRAILPTR].hide()
 
     def show_cch_rails(self):
-        print('trying to show CCH rails')
+
         for name in self.anidict.keys():
             self.anidict[name][CCHRAILPTR].show()
 

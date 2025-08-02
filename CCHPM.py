@@ -13,7 +13,7 @@ from systemtray import *
 import WeaponEditor
 import resource
 from LogTaker import *
-
+from IngameCommand import *
 
 #const definition
 SERVERLIST = {"Any": 0, "P1999Green": 1, "project1999": 2, "KingdomDragons": 3}
@@ -41,7 +41,9 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.logTaker = LogTaker()
         self.ifRALogTakerEnabled=False
         self.autoPopupRALogTaker=False
-
+        self.ingameCommands=IngameCommand(self)
+        self.ifIngameDiscordCommandEnabled=False
+        self.ifProxyIngameCommandEnabled=False
 
         self.initializing = True
         self.msg('INFO:Initializing configuration.Please wait...')
@@ -99,6 +101,12 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         if self.agroMeterOnlineSyncEnabled:
             self.onlineSyncHandler_timer.start(ONLINE_SYNC_INTERVAL)
 
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_Escape:
+            self.showMinimized()  # 按 ESC 最小化窗口
+            event.accept()  # 标记事件已处理
+        else:
+            super().keyPressEvent(event)  # 其他按键交给父类处理
 
     def closeEvent(self,event):
         self.cfgwin_geo = self.geometry()
@@ -113,6 +121,9 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.agroMeter.window_network.close()
         self.agroMeter.toggle_connection(False)
 
+        self.ingameCommands.shutdown()
+        self.ingameCommands.save_settings()
+
         event.accept()
         QtWidgets.qApp.quit()
 
@@ -126,8 +137,8 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.agroMeter.initializeWeaponBase()
 
     def msg(self,message:str):
-        curr_time = datetime.now()
-        time_str = datetime.strftime(curr_time, '%Y-%m-%d %H:%M:%S')
+        curr_time = datetime.datetime.now()
+        time_str = datetime.datetime.strftime(curr_time, '%Y-%m-%d %H:%M:%S')
 
         self.label_2.setText('['+time_str+']  '+message)
         #time_str = datetime.datetime.strftime(curr_time, '%Y-%m-%d %H:%M:%S') 这里需要加入显示毫秒，以便后续用于REPLAY。
@@ -353,6 +364,35 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             self.spinBox_27.setValue(self.max_loaded_event)
             self.logTaker.max_loaded_event_handler(self.max_loaded_event)
 
+            # 在程序启动时要验证webhook
+            valid = self.ingameCommands.verify_webhook_config()
+            if valid:
+                # 验证通过，可以启用功能
+                self.ifIngameDiscordCommandEnabled = True
+                self.checkBox_8.setChecked(True)
+                self.checkBox_8.setStyleSheet("QCheckBox { color: green; }")
+            else:
+                # 验证失败，禁用功能
+                self.ifIngameDiscordCommandEnabled = False
+                self.checkBox_8.setChecked(False)
+                self.checkBox_8.setStyleSheet("QCheckBox { color: red; }")
+
+            # 在程序启动时要验证proxy其他玩家游戏内命令授权
+            result = self.ingameCommands.verify_proxy_config()
+            if result == "N/A":
+                self.checkBox_9.setEnabled(False)
+            elif result=="YES":
+                # 验证通过，可以启用功能
+                self.checkBox_9.setEnabled(True)
+                self.ifProxyIngameCommandEnabled = True
+                self.checkBox_9.setChecked(True)
+            elif result == "NO":
+                # 验证失败，禁用功能
+                self.checkBox_9.setEnabled(True)
+                self.ifProxyIngameCommandEnabled = False
+                self.checkBox_9.setChecked(False)
+
+
         except Exception as e:
             self.msg(f'ERROR:{str(e)} not found.Using default configuration')
 
@@ -520,7 +560,7 @@ class CFGWIN(QWidget,Ui_CFGWIN):
                 self.setWeaponsForYourName()
                 self.setupYourNameToAggroMeter()
                 self.logTaker.initialize_filters(self.yourName)
-
+                self.setupYourNameToIngamecommand()
                 self.msg(f"INFO:Current log file is: {self.curLogFile}")
                 self.logfilechanged = True
                 self.lastSizesOfLogFiles = currentSizesOfLogFiles
@@ -566,6 +606,8 @@ class CFGWIN(QWidget,Ui_CFGWIN):
                 self.agroMeter.logProcessor(line,self.blockSequenceNumber)
             if self.ifRALogTakerEnabled == True:
                 self.logTaker.online_process(line)
+            if self.ifIngameDiscordCommandEnabled == True:
+                self.ingameCommands.logProcessor(line)
             line = self.f.readline()
 
     def logProcessor(self,line:str):
@@ -799,9 +841,9 @@ class CFGWIN(QWidget,Ui_CFGWIN):
 
 
     def weaponEditor(self):
-        #self.we.setWindowFlags(QtCore.Qt.Tool)
-
         self.we.show()
+        self.we.activateWindow()
+        self.we.raise_()
 
     def setWeaponsForYourName(self):
 
@@ -824,6 +866,56 @@ class CFGWIN(QWidget,Ui_CFGWIN):
     def setupYourNameToAggroMeter(self):
 
         self.agroMeter.setupYourName(self.yourName)
+
+
+    def setupYourNameToIngamecommand(self):
+
+        self.ingameCommands.setupYourName(self.yourName)
+
+    def enableIngameDiscordCommandHandler(self,userChecked:bool):
+
+        if self.initializing:
+            return
+
+        if userChecked:
+            self.ifIngameDiscordCommandEnabled = self.ingameCommands.setWebhook()
+        else:
+            self.ifIngameDiscordCommandEnabled = False
+
+        if self.ifIngameDiscordCommandEnabled:
+            self.ingameCommands.setIngameDiscordCommandEnable(True)
+            self.msg("INFO:In-game Discord Command Enabled.")
+            self.checkBox_8.setStyleSheet("QCheckBox { color: green; }")
+            self.checkBox_8.setChecked(True)
+        else:
+            self.ingameCommands.setIngameDiscordCommandEnable(False)
+            self.msg("INFO:In-game Discord Command Disabled.")
+            self.checkBox_8.setStyleSheet("QCheckBox { color: red; }")
+            self.checkBox_8.setChecked(False)
+
+
+    def enableProxyIngameCommandHandler(self,userChecked:bool):
+
+        if self.initializing:
+            return
+
+        if userChecked:
+            self.ifProxyIngameCommandEnabled = self.ingameCommands.checkProxyAuthorization()
+        else:
+            self.ifProxyIngameCommandEnabled = False
+
+        if self.ifProxyIngameCommandEnabled:
+            self.ingameCommands.setProxyIngameCommandEnable(True)
+            self.msg("INFO:Proxy In-game Command Enabled.")
+            self.checkBox_9.setChecked(True)
+        else:
+            self.ingameCommands.setProxyIngameCommandEnable(False)
+            self.msg("INFO:Proxy In-game Command Disabled.")
+            self.checkBox_9.setChecked(False)
+
+    def commandEditorHandler(self):
+
+        self.ingameCommands.show_editor()
 
 
     def RALogTakerEnabled(self,ifRALogTakerEnabled:bool):
@@ -1225,7 +1317,8 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         os.startfile(".\\CCHPM RUN LOG.txt")
         os.startfile(".\\AgroMeter RUN LOG.txt")
         #self.agroMeter.test_reconnect()
-
+        print(f"Qt 版本: {QT_VERSION_STR}")  # 输出 Qt 库版本
+        print(f"PyQt5 版本: {PYQT_VERSION_STR}")  # 输出 PyQt5 绑定版本
 
 if __name__ == "__main__":
 
