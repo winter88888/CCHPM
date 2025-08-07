@@ -14,10 +14,24 @@ import WeaponEditor
 import resource
 from LogTaker import *
 from IngameCommand import *
+from StrafeRunLine import *
+
 
 #const definition
 SERVERLIST = {"Any": 0, "P1999Green": 1, "project1999": 2, "KingdomDragons": 3}
 POSlIST = {"On bar":0, "Under bar":1, "Above bar":2}
+COLOR_DICT = {
+            "Green": 0,
+            "Red": 1,
+            "Blue": 2,
+            "Black": 3,
+            "Brown": 4,
+            "White": 5,
+            "Yellow": 6,
+            "Orange": 7,
+            "Purple": 8,
+            "Teal": 9
+        }
 LOG_MONITORING_INTERVAL=10 # 10 milliseconds
 LOGDIR_MONITORING_INTERVAL=3000 # 3 seconds
 CCHWIN_MONITORING_INTERVAL=100  # 100 milliseconds for garbage collection
@@ -44,6 +58,12 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.ingameCommands=IngameCommand(self)
         self.ifIngameDiscordCommandEnabled=False
         self.ifProxyIngameCommandEnabled=False
+        self.left_strafe_line = StrafeLine()
+        self.left_strafe_line.setWindowTitle("Left Strafe Line")
+        self.right_strafe_line = StrafeLine()
+        self.right_strafe_line.setWindowTitle("Right Strafe Line")
+        self.ifRightStrafeLineEnabled=False
+        self.ifLeftStrafeLineEnabled=False
 
         self.initializing = True
         self.msg('INFO:Initializing configuration.Please wait...')
@@ -164,8 +184,8 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.configdata['cchwinwidthMargin'] = 2
         self.configdata['heigthMargin'] = 2
         self.configdata['cfgwin_geo'] = QtCore.QRect(546, 257, 827, 526)
-        self.configdata['hotkeyFormatstr'] = '### - CH - tankname'
-        self.configdata['hotkeyFormatList'] = ['### - CH - tankname','ST ### CH -- tankname']
+        self.configdata['hotkeyFormatstr'] = 'KCH - tankname - ###'
+        self.configdata['hotkeyFormatList'] = ['KCH - tankname - ###','### - CH - tankname','GG ### CH -- tankname']
 
         self.configdata['agroMeterEnabled'] = True
         self.configdata['agroMeterGeo'] = QtCore.QRect(1003, 664, 267, 146)
@@ -181,14 +201,18 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.configdata['ifShowEqualSlowEnabled'] = True
         self.configdata['ifShowTankDiscEnabled'] =  False
 
-
-
-
         self.configdata['ifRALogTakerEnabled'] = True
         self.configdata['autoPopupRALogTaker'] = False
         self.configdata['tellWaitingTime']=10                #minute
         self.configdata["logTakerGeo"] = QtCore.QRect(358, 319, 1167, 587)
         self.configdata['max_loaded_event']=20               #20 events
+
+        self.configdata['leftStrafeLineGeo'] = QtCore.QRect(394, 200, 132, 500)
+        self.configdata['rightStrafeLineGeo'] = QtCore.QRect(1239, 200, 123, 500)
+        self.configdata['leftStrafeLineEnabled'] = False
+        self.configdata['rightStrafeLineEnabled'] = False
+        self.configdata['strafe_line_width'] = 3
+        self.configdata['strafe_line_color'] = "Red"
 
 
     def initialize_from_configfile(self):
@@ -392,6 +416,32 @@ class CFGWIN(QWidget,Ui_CFGWIN):
                 self.ifProxyIngameCommandEnabled = False
                 self.checkBox_9.setChecked(False)
 
+            self.leftStrafeLineGeo = self.configdata['leftStrafeLineGeo']
+            self.rightStrafeLineGeo = self.configdata['rightStrafeLineGeo']
+            self.left_strafe_line.setGeometry( self.leftStrafeLineGeo)
+            self.right_strafe_line.setGeometry( self.rightStrafeLineGeo)
+            self.left_strafe_line.reAdjustLines()
+            self.right_strafe_line.reAdjustLines()
+
+
+            self.ifLeftStrafeLineEnabled = self.configdata['leftStrafeLineEnabled']
+            self.ifRightStrafeLineEnabled = self.configdata ['rightStrafeLineEnabled']
+            self.checkBox_10.setChecked(self.ifLeftStrafeLineEnabled)
+            self.checkBox_11.setChecked(self.ifRightStrafeLineEnabled)
+            if self.ifLeftStrafeLineEnabled:
+                self.left_strafe_line.show_line()
+            if self.ifRightStrafeLineEnabled:
+                self.right_strafe_line.show_line()
+
+            self.strafe_line_width = self.configdata['strafe_line_width']
+            self.left_strafe_line.set_width(self.strafe_line_width)
+            self.right_strafe_line.set_width(self.strafe_line_width)
+            self.spinBox_28.setValue(self.strafe_line_width)
+
+            self.strafe_line_color = self.configdata['strafe_line_color']
+            self.left_strafe_line.set_color(self.strafe_line_color)
+            self.right_strafe_line.set_color(self.strafe_line_color)
+            self.comboBox_4.setCurrentIndex(COLOR_DICT[self.strafe_line_color])
 
         except Exception as e:
             self.msg(f'ERROR:{str(e)} not found.Using default configuration')
@@ -477,6 +527,16 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.logTakerGeo = self.logTaker.geometry()
         self.configdata["logTakerGeo"] = self.logTakerGeo
         self.configdata["max_loaded_event"] = self.max_loaded_event
+
+
+        self.leftStrafeLineGeo=self.left_strafe_line.geometry()
+        self.rightStrafeLineGeo = self.right_strafe_line.geometry()
+        self.configdata['leftStrafeLineGeo'] = self.leftStrafeLineGeo
+        self.configdata['rightStrafeLineGeo'] = self.rightStrafeLineGeo
+        self.configdata['leftStrafeLineEnabled'] = self.ifLeftStrafeLineEnabled
+        self.configdata['rightStrafeLineEnabled'] = self.ifRightStrafeLineEnabled
+        self.configdata['strafe_line_width'] = self.strafe_line_width
+        self.configdata['strafe_line_color'] = self.strafe_line_color
 
 
         with open('CCHPM.ini', 'wb') as f:
@@ -917,6 +977,59 @@ class CFGWIN(QWidget,Ui_CFGWIN):
 
         self.ingameCommands.show_editor()
 
+    def enableLeftStrafeLine(self,userChecked:bool):
+
+        if self.initializing:
+            return
+
+        self.ifLeftStrafeLineEnabled = userChecked
+
+        self.saveconfig()
+        if self.ifLeftStrafeLineEnabled:
+            self.left_strafe_line.show_line()
+            self.msg("INFO:Left Strafe Line Enabled.")
+        else:
+            self.left_strafe_line.hide_line()
+            self.msg("INFO:Left Strafe Line Disabled.")
+
+    def enableRightStrfeLine(self, userChecked: bool):
+
+        if self.initializing:
+            return
+
+        self.ifRightStrafeLineEnabled = userChecked
+
+        self.saveconfig()
+        if self.ifRightStrafeLineEnabled:
+            self.right_strafe_line.show_line()
+            self.msg("INFO:Right Strafe Line Enabled.")
+        else:
+            self.right_strafe_line.hide_line()
+            self.msg("INFO:Right Strafe Line Disabled.")
+
+    def strafeLineWidthHandler(self,width:int):
+        if self.initializing:
+            return
+
+        self.strafe_line_width=width
+        self.left_strafe_line.set_width(width)
+        self.right_strafe_line.set_width(width)
+
+        self.saveconfig()
+        self.msg(f"INFO:Strafe run line width changed to {width} pixel.")
+
+    def strafeLineColorHandler(self,color:str):
+        if self.initializing:
+            return
+
+        self.strafe_line_color=color
+        self.left_strafe_line.set_color(color)
+        self.right_strafe_line.set_color(color)
+
+        self.saveconfig()
+        self.msg(f"INFO:Strafe run line color changed to {color}.")
+
+
 
     def RALogTakerEnabled(self,ifRALogTakerEnabled:bool):
         if self.initializing:
@@ -1025,17 +1138,12 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.pushButton_8.setEnabled(True)
         self.pushButton_9.setEnabled(True)
         self.pushButton_3.setEnabled(False)
-        #print("CCHWIN GEO:", self.cchwinGeo)
-        #print("CCHWIN actuall GEO:", self.cchwin.geometry())
-        self.cchwin.setWindowOpacity(0.5)
-        self.cchwin.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Tool)
 
-#        self.cchwin.setWindowFlags(self.defaultwindowflags)
-#        self.cchwin.setAttribute(QtCore.Qt.WA_TranslucentBackground)  # 设置窗口背景透明
-#        self.cchwin.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents,on=False) #窗口点击而过，不响应鼠标（貌似无效）。
-
-        self.cchwin.setGeometry(self.cchwinGeo)
-        self.cchwin.show()
+        if self.ifstartCHMonitor:
+            self.cchwin.setWindowOpacity(0.5)
+            self.cchwin.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Tool)
+            self.cchwin.setGeometry(self.cchwinGeo)
+            self.cchwin.show()
 
 
         if self.agroMeterEnabled:
@@ -1049,6 +1157,17 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             self.agroMeter.window_network.setGeometry(self.agroNetworkMeterGeo)
             self.agroMeter.window_network.show()
 
+        if self.ifLeftStrafeLineEnabled:
+            self.left_strafe_line.setWindowOpacity(0.5)
+            self.left_strafe_line.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Tool)
+            self.left_strafe_line.setGeometry(self.leftStrafeLineGeo)
+            self.left_strafe_line.show()
+
+        if self.ifRightStrafeLineEnabled:
+            self.right_strafe_line.setWindowOpacity(0.5)
+            self.right_strafe_line.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Tool)
+            self.right_strafe_line.setGeometry(self.rightStrafeLineGeo)
+            self.right_strafe_line.show()
 
     def modifyMonitorUIdone(self):
 
@@ -1086,6 +1205,12 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.agroMeter.hideNetworkAgroMeter()
         self.agroMeter.hideNetworkAgroMeter()
 
+        self.left_strafe_line.hide()
+        self.right_strafe_line.hide()
+        self.left_strafe_line.reAdjustLines()
+        self.right_strafe_line.reAdjustLines()
+
+
     def lockunlock(self):
         if self.locked:
             self.modifyMonitorUIstart()
@@ -1097,10 +1222,15 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.cchwin.restart_ani()
         self.cchwin.reAdjustRails()
         self.agroMeter.reAdjustPanel()
+        self.left_strafe_line.reAdjustLines()
+        self.right_strafe_line.reAdjustLines()
+
         #此处需获取CCHWIN的相关参数，并保存到配置文件中，包括geometry
         self.msg("Saving current configurations and readjust UI layout.")
-        print('cch window geo:'+str(self.cchwinGeo))
-        print('saving!')
+        #print('cch window geo:'+str(self.cchwinGeo))
+        #print('left line window geo:' + str(self.leftStrafeLineGeo))
+        #print('right line window geo:' + str(self.rightStrafeLineGeo))
+        #print('saving!')
         self.saveconfig() #需补保存窗口位置的代码。
 
 
@@ -1137,6 +1267,8 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.cchwin.reAdjustRails()
         if self.agroMeterEnabled:
             self.agroMeter.reAdjustPanel()
+        self.left_strafe_line.reAdjustLines()
+        self.right_strafe_line.reAdjustLines()
         self.msg("Readjust UI layout.")
 
     def default(self):

@@ -17,7 +17,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>CCHPM v3.13 --Chain CH Performance Monitor</string>
+   <string>CCHPM v3.14 --Chain CH Performance Monitor</string>
   </property>
   <widget class="QPushButton" name="pushButton">
    <property name="geometry">
@@ -1306,7 +1306,7 @@
      <x>10</x>
      <y>400</y>
      <width>711</width>
-     <height>101</height>
+     <height>91</height>
     </rect>
    </property>
    <property name="font">
@@ -1360,7 +1360,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>70</y>
+      <y>60</y>
       <width>201</width>
       <height>21</height>
      </rect>
@@ -1420,7 +1420,7 @@
     <property name="geometry">
      <rect>
       <x>210</x>
-      <y>70</y>
+      <y>60</y>
       <width>161</width>
       <height>21</height>
      </rect>
@@ -1439,7 +1439,7 @@
     <property name="geometry">
      <rect>
       <x>370</x>
-      <y>70</y>
+      <y>60</y>
       <width>71</width>
       <height>22</height>
      </rect>
@@ -1462,9 +1462,9 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>510</y>
+     <y>500</y>
      <width>711</width>
-     <height>71</height>
+     <height>81</height>
     </rect>
    </property>
    <property name="font">
@@ -1480,7 +1480,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>30</y>
+      <y>20</y>
       <width>291</width>
       <height>21</height>
      </rect>
@@ -1501,8 +1501,8 @@
     </property>
     <property name="geometry">
      <rect>
-      <x>300</x>
-      <y>30</y>
+      <x>280</x>
+      <y>20</y>
       <width>291</width>
       <height>21</height>
      </rect>
@@ -1535,6 +1535,170 @@
     <property name="text">
      <string>Command Editor</string>
     </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_10">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>50</y>
+      <width>151</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Enable Left Strafe Line</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="checkBox_11">
+    <property name="geometry">
+     <rect>
+      <x>160</x>
+      <y>50</y>
+      <width>151</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Enable Right Strafe Line</string>
+    </property>
+   </widget>
+   <widget class="QSpinBox" name="spinBox_28">
+    <property name="geometry">
+     <rect>
+      <x>380</x>
+      <y>50</y>
+      <width>61</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="suffix">
+     <string>pixel</string>
+    </property>
+    <property name="minimum">
+     <number>1</number>
+    </property>
+    <property name="maximum">
+     <number>10</number>
+    </property>
+    <property name="value">
+     <number>3</number>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_36">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>50</y>
+      <width>41</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Width</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_37">
+    <property name="geometry">
+     <rect>
+      <x>450</x>
+      <y>50</y>
+      <width>41</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>9</pointsize>
+     </font>
+    </property>
+    <property name="text">
+     <string>Color</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBox_4">
+    <property name="geometry">
+     <rect>
+      <x>490</x>
+      <y>50</y>
+      <width>71</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <family>Arial</family>
+      <pointsize>8</pointsize>
+     </font>
+    </property>
+    <item>
+     <property name="text">
+      <string>Green</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Red</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Blue</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Black</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Brown</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>White</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Yellow</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Orange</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Purple</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Teal</string>
+     </property>
+    </item>
    </widget>
   </widget>
   <zorder>line_6</zorder>
@@ -2096,7 +2260,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>393</x>
-     <y>483</y>
+     <y>473</y>
     </hint>
     <hint type="destinationlabel">
      <x>391</x>
@@ -2192,7 +2356,7 @@
    <hints>
     <hint type="sourcelabel">
      <x>68</x>
-     <y>552</y>
+     <y>532</y>
     </hint>
     <hint type="destinationlabel">
      <x>67</x>
@@ -2207,12 +2371,76 @@
    <slot>enableProxyIngameCommandHandler()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>509</x>
-     <y>554</y>
+     <x>489</x>
+     <y>534</y>
     </hint>
     <hint type="destinationlabel">
      <x>489</x>
      <y>906</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBox_10</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>CFGWIN</receiver>
+   <slot>enableLeftStrafeLine()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>92</x>
+     <y>559</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>86</x>
+     <y>831</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBox_11</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>CFGWIN</receiver>
+   <slot>enableRightStrfeLine()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>240</x>
+     <y>562</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>374</x>
+     <y>895</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>spinBox_28</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>CFGWIN</receiver>
+   <slot>strafeLineWidthHandler()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>448</x>
+     <y>561</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>431</x>
+     <y>864</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>comboBox_4</sender>
+   <signal>currentIndexChanged(QString)</signal>
+   <receiver>CFGWIN</receiver>
+   <slot>strafeLineColorHandler()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>539</x>
+     <y>560</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>546</x>
+     <y>874</y>
     </hint>
    </hints>
   </connection>
@@ -2261,5 +2489,9 @@
   <slot>commandEditorHandler()</slot>
   <slot>enableIngameDiscordCommandHandler()</slot>
   <slot>enableProxyIngameCommandHandler()</slot>
+  <slot>enableLeftStrafeLine()</slot>
+  <slot>enableRightStrfeLine()</slot>
+  <slot>strafeLineWidthHandler()</slot>
+  <slot>strafeLineColorHandler()</slot>
  </slots>
 </ui>
