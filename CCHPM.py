@@ -16,6 +16,54 @@ from LogTaker import *
 from IngameCommand import *
 from StrafeRunLine import *
 
+import time
+import functools
+from collections import defaultdict
+
+'''# 性能统计字典 - 添加到文件开头
+performance_stats = defaultdict(list)
+
+
+def performance_monitor(func):
+    """性能监控装饰器"""
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        start_time = time.perf_counter()
+        result = func(*args, **kwargs)
+        end_time = time.perf_counter()
+        elapsed = (end_time - start_time) * 1000  # 转换为毫秒
+
+        # 记录性能数据
+        performance_stats[func.__name__].append(elapsed)
+
+        # 如果耗时超过阈值，记录警告
+        if elapsed > 50:  # 50ms阈值
+            try:
+                args[0].msg(f"PERF WARNING: {func.__name__} took {elapsed:.2f}ms")
+            except:
+                pass
+
+        return result
+
+    return wrapper
+'''
+
+
+from watchdog.observers import Observer
+from watchdog.events import FileSystemEventHandler
+class LogFileHandler(FileSystemEventHandler):
+    def __init__(self, parent):
+        self.parent = parent  # 保留对CFGWIN的引用
+
+    def on_modified(self, event):
+        if not event.is_directory:
+            try:
+                if os.access(event.src_path, os.R_OK) and self.parent.applyLogfileFilter(event.src_path):
+                    self.parent.handle_log_change(event.src_path)
+            except Exception as e:
+                self.parent.msg(f"ERROR: Cannot access file {event.src_path}: {str(e)}")
+
 
 #const definition
 SERVERLIST = {"Any": 0, "P1999Green": 1, "project1999": 2, "KingdomDragons": 3}
@@ -33,13 +81,18 @@ COLOR_DICT = {
             "Teal": 9
         }
 LOG_MONITORING_INTERVAL=10 # 10 milliseconds
-LOGDIR_MONITORING_INTERVAL=3000 # 3 seconds
-CCHWIN_MONITORING_INTERVAL=100  # 100 milliseconds for garbage collection
+#LOGDIR_MONITORING_INTERVAL=3000 # 3 seconds
+CCHWIN_MONITORING_INTERVAL=5000  # 5 seconds for garbage collection
 TEST_CHAIN_INTERVAL=1000
 CLEANSING_AGRO_METER_INTERVAL=10        #default is to cleanse agro table dictionary every 10s
 HIDE_AGRO_METER_INTERVAL=60             #default is to hide agro meter if no new agro action in a minute
 AGRO_TABLE_EXPIRE_DURATION= 10          #default is 10 mins for unseen slain msg, hence need to clear that mob.
 ONLINE_SYNC_INTERVAL=100                  #default is to send data to server every 1/10 second.
+
+
+
+
+
 
 class CFGWIN(QWidget,Ui_CFGWIN):
     def __init__(self):
@@ -64,6 +117,7 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.right_strafe_line.setWindowTitle("Right Strafe Line")
         self.ifRightStrafeLineEnabled=False
         self.ifLeftStrafeLineEnabled=False
+        self.file_change_counter = 0
 
         self.initializing = True
         self.msg('INFO:Initializing configuration.Please wait...')
@@ -75,7 +129,7 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.blockSequenceNumber=0
 
         self.yourName="none"
-        self.f = open('CCHPM RUN LOG.txt','r',encoding='utf-8')
+        self.f = None
         #self.defaultwindowflags=self.cchwin.windowFlags()
         self.init_style=self.style()
 
@@ -91,12 +145,9 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.pushButton_7.setEnabled(False)
         self.pushButton_8.setEnabled(False)
         self.pushButton_9.setEnabled(False)
-        self.label_18.setEnabled(False)
-        self.label_19.setEnabled(False)
+
         self.label_20.setEnabled(False)
         self.label_21.setEnabled(False)
-        self.spinBox_9.setEnabled(False)
-        self.spinBox_10.setEnabled(False)
         self.spinBox_11.setEnabled(False)
         self.spinBox_12.setEnabled(False)
 
@@ -121,6 +172,36 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         if self.agroMeterOnlineSyncEnabled:
             self.onlineSyncHandler_timer.start(ONLINE_SYNC_INTERVAL)
 
+
+        # 启动监控
+        self.scanLogDir()
+
+    '''
+        # 添加性能报告定时器
+        self.perf_report_timer = QTimer(self)
+        self.perf_report_timer.timeout.connect(self.report_performance)
+        self.perf_report_timer.start(10000)  # 每10秒报告一次
+
+    def report_performance(self):
+        """性能报告功能"""
+        if not performance_stats:
+            return
+
+        report_lines = ["Performance Report:"]
+        for func_name, times in performance_stats.items():
+            if times:
+                avg = sum(times) / len(times)
+                max_time = max(times)
+                report_lines.append(f"{func_name}: avg={avg:.2f}ms, max={max_time:.2f}ms, calls={len(times)}")
+
+        # 输出到日志
+        self.msg("\n".join(report_lines))
+        print("\n".join(report_lines))
+
+        # 清空统计数据
+        performance_stats.clear()
+    '''
+
     def keyPressEvent(self, event):
         if event.key() == QtCore.Qt.Key_Escape:
             self.showMinimized()  # 按 ESC 最小化窗口
@@ -129,6 +210,18 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             super().keyPressEvent(event)  # 其他按键交给父类处理
 
     def closeEvent(self,event):
+
+        """确保关闭时停止observer"""
+        if hasattr(self, 'observer'):
+            try:
+                if self.observer.is_alive():
+                    self.observer.stop()
+                    self.observer.join(timeout=1)  # 添加超时防止卡死
+            except RuntimeError as e:
+                self.msg(f"WARNING: {str(e)}")
+            except Exception as e:
+                self.msg(f"ERROR: Failed to stop directory monitor: {str(e)}")
+
         self.cfgwin_geo = self.geometry()
         self.MHWeapon = self.agroMeter.MHWeapon
         self.OHWeapon = self.agroMeter.OHWeapon
@@ -186,6 +279,10 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.configdata['cfgwin_geo'] = QtCore.QRect(546, 257, 827, 526)
         self.configdata['hotkeyFormatstr'] = 'KCH - tankname - ###'
         self.configdata['hotkeyFormatList'] = ['KCH - tankname - ###','### - CH - tankname','GG ### CH -- tankname']
+        self.configdata['mtNameLength'] = 7
+        self.configdata['mtNameMargin'] = 1
+
+
 
         self.configdata['agroMeterEnabled'] = True
         self.configdata['agroMeterGeo'] = QtCore.QRect(1003, 664, 267, 146)
@@ -214,13 +311,62 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.configdata['strafe_line_width'] = 3
         self.configdata['strafe_line_color'] = "Red"
 
+    def get_config_date_safely(self, argument: str):
+        try:
+            data = self.configdata[argument]
+            return data
+        except KeyError:
+            # 为所有在 loaddefaultconfig 中定义的键提供默认值
+            default_values = {
+                "eqLogDir": 'C:\\EQ main directory\\Logs',
+                "serverSlect": 'Any',
+                "ifautostart": True,
+                "ifstartCHMonitor": True,
+                "mark_pos": 'On bar',
+                "chInterval": 1,
+                "cchwinGeo": QtCore.QRect(586, 669, 358, 126),
+                "railheight": 20,
+                "cchwinwidthMargin": 2,
+                "heigthMargin": 2,
+                "cfgwin_geo": QtCore.QRect(546, 257, 827, 526),
+                "hotkeyFormatstr": 'KCH - tankname - ###',
+                "hotkeyFormatList": ['KCH - tankname - ###', '### - CH - tankname', 'GG ### CH -- tankname'],
+                "mtNameLength": 7,
+                "mtNameMargin": 1,
+                "agroMeterEnabled": True,
+                "agroMeterGeo": QtCore.QRect(1003, 664, 267, 146),
+                "agroNetworkMeterGeo": QtCore.QRect(1282, 663, 296, 155),
+                "hideAgroMeterInterval": HIDE_AGRO_METER_INTERVAL,
+                "agroTableExpireDuration": AGRO_TABLE_EXPIRE_DURATION,
+                "weaponDict": {"None": ("???", "???")},
+                "agroMeterOpacity": 100,
+                "mainHandSwingRate": 569,
+                "agroMeterOnlineSyncEnabled": True,
+                "latencyTolerance": 100,
+                "ifShowEqualDBGBEnabled": True,
+                "ifShowEqualSlowEnabled": True,
+                "ifShowTankDiscEnabled": False,
+                "ifRALogTakerEnabled": True,
+                "autoPopupRALogTaker": False,
+                "tellWaitingTime": 10,
+                "logTakerGeo": QtCore.QRect(358, 319, 1167, 587),
+                "max_loaded_event": 20,
+                "leftStrafeLineGeo": QtCore.QRect(394, 200, 132, 500),
+                "rightStrafeLineGeo": QtCore.QRect(1239, 200, 123, 500),
+                "leftStrafeLineEnabled": False,
+                "rightStrafeLineEnabled": False,
+                "strafe_line_width": 3,
+                "strafe_line_color": "Red"
+            }
+
+            # 返回默认值，如果键不存在于默认值中则返回 None
+            return default_values.get(argument, None)
 
     def initialize_from_configfile(self):
-
         if os.path.exists('CCHPM.ini'):
-            with open('CCHPM.ini','rb') as f:
+            with open('CCHPM.ini', 'rb') as f:
                 try:
-                    self.configdata=pickle.load(f)
+                    self.configdata = pickle.load(f)
                 except Exception as e:
                     self.msg(f'ERROR:{str(e)}.Using default configuration')
                     self.loaddefaultconfig()
@@ -229,73 +375,81 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             self.loaddefaultconfig()
 
         try:
+            # 获取配置值，如果为None则报错退出
+            def get_config_or_exit(key, description):
+                value = self.get_config_date_safely(key)
+                if value is None:
+                    self.msg(f"FATAL ERROR: Missing required configuration '{key}' ({description})")
+                    QtWidgets.QApplication.quit()
+                    sys.exit(1)
+                return value
 
-            #to add more attribute and intialize ui by saved settings.
-            self.eqLogDir = self.configdata['eqLogDir']
+            # 基础配置
+            self.eqLogDir = get_config_or_exit('eqLogDir', 'EQ log directory')
             self.lineEdit.setText(self.eqLogDir)
 
-            self.serverSlect = self.configdata['serverSlect']
+            self.serverSlect = get_config_or_exit('serverSlect', 'Server selection')
             self.comboBox.setCurrentIndex(SERVERLIST[self.serverSlect])
 
-            self.ifautostart = self.configdata['ifautostart']
+            self.ifautostart = get_config_or_exit('ifautostart', 'Auto start flag')
             self.started = self.ifautostart
 
-            self.ifstartCHMonitor=self.configdata['ifstartCHMonitor']
+            self.ifstartCHMonitor = get_config_or_exit('ifstartCHMonitor', 'CH monitor enabled flag')
             self.checkBox.setChecked(self.ifstartCHMonitor)
             if self.ifstartCHMonitor:
                 self.checkBox.setStyleSheet("QCheckBox { color: green; }")
             else:
                 self.checkBox.setStyleSheet("QCheckBox { color: red; }")
 
-            self.mark_pos = self.configdata['mark_pos']
+            self.mark_pos = get_config_or_exit('mark_pos', 'Mark position')
             self.comboBox_3.setCurrentIndex(POSlIST[self.mark_pos])
             self.cchwin.mark_pos = self.mark_pos
 
-            self.chInterval = self.configdata['chInterval']
+            self.chInterval = get_config_or_exit('chInterval', 'CH interval')
             self.spinBox_4.setValue(self.chInterval)
             self.cchwin.setinterval(self.chInterval)
 
-            self.cchwinGeo=self.configdata['cchwinGeo']
+            self.cchwinGeo = get_config_or_exit('cchwinGeo', 'CCH window geometry')
             self.cchwin.setGeometry(self.cchwinGeo)
 
-            self.railheight=self.configdata['railheight']
+            self.railheight = get_config_or_exit('railheight', 'Rail height')
             self.spinBox.setValue(self.railheight)
-            self.cchwin.railheight=self.railheight
+            self.cchwin.railheight = self.railheight
 
+            self.mtNameLength = get_config_or_exit('mtNameLength', 'MT name length')
+            self.spinBox_9.setValue(self.mtNameLength)
 
+            self.mtNameMargin = get_config_or_exit('mtNameMargin', 'MT name margin')
+            self.spinBox_10.setValue(self.mtNameMargin)
+            self.cchwin.mt_name_margin = self.mtNameMargin
 
             self.logfile_moniter_timer = QTimer(self)
             self.logfile_moniter_timer.timeout.connect(self.scanCurrentLog)
-
-            self.logfiledir_moniter_timer = QTimer(self)
-            self.logfiledir_moniter_timer.timeout.connect(self.scanLogDir)
 
             if self.started:
                 self.pushButton_3.setText("ON AIR")
                 self.pushButton_3.setFont(self.font())
                 self.pushButton_3.setStyleSheet('background-color: green;')
                 self.logfile_moniter_timer.start(LOG_MONITORING_INTERVAL)
-                self.logfiledir_moniter_timer.start(LOGDIR_MONITORING_INTERVAL)
             else:
                 self.pushButton_3.setText("PAUSED")
                 self.pushButton_3.setFont(self.font())
                 self.pushButton_3.setStyleSheet('background-color: red;')
 
-
-            self.cchwinwidthMargin = self.configdata['cchwinwidthMargin']
+            self.cchwinwidthMargin = get_config_or_exit('cchwinwidthMargin', 'CCH window width margin')
             self.cchwin.widthMargin = self.cchwinwidthMargin
             self.spinBox_3.setValue(self.cchwinwidthMargin)
 
-            self.cchwinheigthMargin = self.configdata['heigthMargin']
+            self.cchwinheigthMargin = get_config_or_exit('heigthMargin', 'CCH window height margin')
             self.cchwin.heigthMargin = self.cchwinheigthMargin
             self.spinBox_2.setValue(self.cchwinheigthMargin)
 
-            self.cfgwin_geo = self.configdata['cfgwin_geo']
+            self.cfgwin_geo = get_config_or_exit('cfgwin_geo', 'Configuration window geometry')
             self.setGeometry(self.cfgwin_geo)
 
-            self.hotkeyFormatstr = self.configdata['hotkeyFormatstr']
+            self.hotkeyFormatstr = get_config_or_exit('hotkeyFormatstr', 'Hotkey format string')
             self.hotkeyFormat = self.hotkeyFormatParse(self.hotkeyFormatstr)
-            self.hotkeyFormatList = self.configdata['hotkeyFormatList']
+            self.hotkeyFormatList = get_config_or_exit('hotkeyFormatList', 'Hotkey format list')
             self.comboBox_2.clear()
             for i in range(len(self.hotkeyFormatList)):
                 self.comboBox_2.addItem(self.hotkeyFormatList[i])
@@ -303,129 +457,121 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             self.comboBox_2.setCurrentIndex(self.comboBox_2.findText(self.hotkeyFormatstr))
             self.pushButton_12.setEnabled(False)
 
-
             self.msg("INFO:CCHPM finished initialization. Waiting for your order now.")
             self.cchwin.restart_ani()
             self.cchwin.reAdjustRails()
 
-            self.agroMeterEnabled = self.configdata['agroMeterEnabled']
+            # Agro Meter 配置
+            self.agroMeterEnabled = get_config_or_exit('agroMeterEnabled', 'Agro meter enabled flag')
             self.checkBox_2.setChecked(self.agroMeterEnabled)
-
             if self.agroMeterEnabled:
                 self.checkBox_2.setStyleSheet("QCheckBox { color: green; }")
             else:
                 self.checkBox_2.setStyleSheet("QCheckBox { color: red; }")
 
-            self.agroMeterGeo = self.configdata['agroMeterGeo']
+            self.agroMeterGeo = get_config_or_exit('agroMeterGeo', 'Agro meter geometry')
             self.agroMeter.setGeometry(self.agroMeterGeo)
-            self.agroNetworkMeterGeo = self.configdata ['agroNetworkMeterGeo']
+            self.agroNetworkMeterGeo = get_config_or_exit('agroNetworkMeterGeo', 'Agro network meter geometry')
             self.agroMeter.window_network.setGeometry(self.agroNetworkMeterGeo)
 
             self.agroMeter.reAdjustPanel()
-            self.hideAgroMeterInterval=self.configdata['hideAgroMeterInterval']
+            self.hideAgroMeterInterval = get_config_or_exit('hideAgroMeterInterval', 'Hide agro meter interval')
             self.spinBox_23.setValue(int(self.hideAgroMeterInterval))
-            self.agroTableExpireDuration=self.configdata['agroTableExpireDuration']
-            self.agroMeter.agroTableExpireDuration=self.agroTableExpireDuration
+            self.agroTableExpireDuration = get_config_or_exit('agroTableExpireDuration', 'Agro table expire duration')
+            self.agroMeter.agroTableExpireDuration = self.agroTableExpireDuration
             self.spinBox_25.setValue(self.agroTableExpireDuration)
 
-            self.weaponDict = self.configdata['weaponDict']
-            self.MHWeapon="???"
-            self.OHWeapon="???"
-            self.agroMeterOpacity=self.configdata['agroMeterOpacity']
+            self.weaponDict = get_config_or_exit('weaponDict', 'Weapon dictionary')
+            self.MHWeapon = "???"
+            self.OHWeapon = "???"
+            self.agroMeterOpacity = get_config_or_exit('agroMeterOpacity', 'Agro meter opacity')
             self.spinBox_13.setValue(self.agroMeterOpacity)
-            self.agroMeter.label_agroMeterGreen.setWindowOpacity(float(self.agroMeterOpacity)/100)
+            self.agroMeter.label_agroMeterGreen.setWindowOpacity(float(self.agroMeterOpacity) / 100)
             self.agroMeter.label_agroMeterYellow.setWindowOpacity(float(self.agroMeterOpacity) / 100)
             self.agroMeter.label_errorMessage.setWindowOpacity(float(self.agroMeterOpacity) / 100)
 
-            self.mainHandSwingRate=self.configdata['mainHandSwingRate']
+            self.mainHandSwingRate = get_config_or_exit('mainHandSwingRate', 'Main hand swing rate')
             self.spinBox_14.setValue(self.mainHandSwingRate)
-            self.agroMeter.basicMHFireRate=float(self.mainHandSwingRate)/1000
-            self.agroMeter.basicOHFireRate=1-self.agroMeter.basicMHFireRate
+            self.agroMeter.basicMHFireRate = float(self.mainHandSwingRate) / 1000
+            self.agroMeter.basicOHFireRate = 1 - self.agroMeter.basicMHFireRate
             self.agroMeter.setup1hWeaponFireRate()
 
-
-            self.agroMeterOnlineSyncEnabled = self.configdata['agroMeterOnlineSyncEnabled']
+            self.agroMeterOnlineSyncEnabled = get_config_or_exit('agroMeterOnlineSyncEnabled',
+                                                                 'Agro meter online sync enabled')
             self.agroMeter.isOnlineSyncEnabled = self.agroMeterOnlineSyncEnabled
             self.agroMeter.toggle_connection(self.agroMeterOnlineSyncEnabled)
             self.checkBox_5.setChecked(self.agroMeterOnlineSyncEnabled)
 
-            self.latencyTolerance=self.configdata['latencyTolerance']
-            self.agroMeter.latencyTolerance=self.latencyTolerance
+            self.latencyTolerance = get_config_or_exit('latencyTolerance', 'Latency tolerance')
+            self.agroMeter.latencyTolerance = self.latencyTolerance
             self.spinBox_24.setValue(self.latencyTolerance)
 
-            self.ifShowEqualDBGBEnabled=self.configdata['ifShowEqualDBGBEnabled']
+            self.ifShowEqualDBGBEnabled = get_config_or_exit('ifShowEqualDBGBEnabled', 'Show equal DB/GB flag')
             self.agroMeter.ifShowEqualDBGBEnabled = self.ifShowEqualDBGBEnabled
             self.checkBox_6.setChecked(self.ifShowEqualDBGBEnabled)
 
-            self.ifShowEqualSlowEnabled=self.configdata['ifShowEqualSlowEnabled']
-            self.agroMeter.ifShowEqualSlowEnabled=self.ifShowEqualSlowEnabled
+            self.ifShowEqualSlowEnabled = get_config_or_exit('ifShowEqualSlowEnabled', 'Show equal slow flag')
+            self.agroMeter.ifShowEqualSlowEnabled = self.ifShowEqualSlowEnabled
             self.checkBox_7.setChecked(self.ifShowEqualSlowEnabled)
 
-            self.ifShowTankDiscEnabled=self.configdata['ifShowTankDiscEnabled']
-            self.agroMeter.ifShowTankDiscEnabled=self.ifShowTankDiscEnabled
-            #self.checkBox_6.setChecked(self.ifShowTankDiscEnabled)
+            self.ifShowTankDiscEnabled = get_config_or_exit('ifShowTankDiscEnabled', 'Show tank disc flag')
+            self.agroMeter.ifShowTankDiscEnabled = self.ifShowTankDiscEnabled
 
-            self.ifRALogTakerEnabled=self.configdata['ifRALogTakerEnabled']
+            # RA Log Taker 配置
+            self.ifRALogTakerEnabled = get_config_or_exit('ifRALogTakerEnabled', 'RA log taker enabled flag')
             self.checkBox_3.setChecked(self.ifRALogTakerEnabled)
-
             if self.ifRALogTakerEnabled:
                 self.checkBox_3.setStyleSheet("QCheckBox { color: green; }")
             else:
                 self.checkBox_3.setStyleSheet("QCheckBox { color: red; }")
 
-
-
-            self.autoPopupRALogTaker=self.configdata['autoPopupRALogTaker']
+            self.autoPopupRALogTaker = get_config_or_exit('autoPopupRALogTaker', 'Auto popup RA log taker flag')
             self.checkBox_4.setChecked(self.autoPopupRALogTaker)
             self.logTaker.autoPopupRALogTaker = self.autoPopupRALogTaker
-            self.tellWaitingTime=self.configdata['tellWaitingTime']
+            self.tellWaitingTime = get_config_or_exit('tellWaitingTime', 'Tell waiting time')
             self.spinBox_24.setValue(self.tellWaitingTime)
-            self.logTaker.tellWaitingTime=self.tellWaitingTime
-            self.logTakerGeo= self.configdata["logTakerGeo"]
+            self.logTaker.tellWaitingTime = self.tellWaitingTime
+            self.logTakerGeo = get_config_or_exit("logTakerGeo", 'Log taker geometry')
             self.logTaker.setGeometry(self.logTakerGeo)
 
-            self.max_loaded_event=self.configdata['max_loaded_event']
+            self.max_loaded_event = get_config_or_exit('max_loaded_event', 'Max loaded events')
             self.spinBox_27.setValue(self.max_loaded_event)
             self.logTaker.max_loaded_event_handler(self.max_loaded_event)
 
-            # 在程序启动时要验证webhook
+            # 游戏内命令配置
             valid = self.ingameCommands.verify_webhook_config()
             if valid:
-                # 验证通过，可以启用功能
                 self.ifIngameDiscordCommandEnabled = True
                 self.checkBox_8.setChecked(True)
                 self.checkBox_8.setStyleSheet("QCheckBox { color: green; }")
             else:
-                # 验证失败，禁用功能
                 self.ifIngameDiscordCommandEnabled = False
                 self.checkBox_8.setChecked(False)
                 self.checkBox_8.setStyleSheet("QCheckBox { color: red; }")
 
-            # 在程序启动时要验证proxy其他玩家游戏内命令授权
             result = self.ingameCommands.verify_proxy_config()
             if result == "N/A":
                 self.checkBox_9.setEnabled(False)
-            elif result=="YES":
-                # 验证通过，可以启用功能
+            elif result == "YES":
                 self.checkBox_9.setEnabled(True)
                 self.ifProxyIngameCommandEnabled = True
                 self.checkBox_9.setChecked(True)
             elif result == "NO":
-                # 验证失败，禁用功能
                 self.checkBox_9.setEnabled(True)
                 self.ifProxyIngameCommandEnabled = False
                 self.checkBox_9.setChecked(False)
 
-            self.leftStrafeLineGeo = self.configdata['leftStrafeLineGeo']
-            self.rightStrafeLineGeo = self.configdata['rightStrafeLineGeo']
-            self.left_strafe_line.setGeometry( self.leftStrafeLineGeo)
-            self.right_strafe_line.setGeometry( self.rightStrafeLineGeo)
+            # 走直线配置
+            self.leftStrafeLineGeo = get_config_or_exit('leftStrafeLineGeo', 'Left strafe line geometry')
+            self.rightStrafeLineGeo = get_config_or_exit('rightStrafeLineGeo', 'Right strafe line geometry')
+            self.left_strafe_line.setGeometry(self.leftStrafeLineGeo)
+            self.right_strafe_line.setGeometry(self.rightStrafeLineGeo)
             self.left_strafe_line.reAdjustLines()
             self.right_strafe_line.reAdjustLines()
 
-
-            self.ifLeftStrafeLineEnabled = self.configdata['leftStrafeLineEnabled']
-            self.ifRightStrafeLineEnabled = self.configdata ['rightStrafeLineEnabled']
+            self.ifLeftStrafeLineEnabled = get_config_or_exit('leftStrafeLineEnabled', 'Left strafe line enabled flag')
+            self.ifRightStrafeLineEnabled = get_config_or_exit('rightStrafeLineEnabled',
+                                                               'Right strafe line enabled flag')
             self.checkBox_10.setChecked(self.ifLeftStrafeLineEnabled)
             self.checkBox_11.setChecked(self.ifRightStrafeLineEnabled)
             if self.ifLeftStrafeLineEnabled:
@@ -433,18 +579,21 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             if self.ifRightStrafeLineEnabled:
                 self.right_strafe_line.show_line()
 
-            self.strafe_line_width = self.configdata['strafe_line_width']
+            self.strafe_line_width = get_config_or_exit('strafe_line_width', 'Strafe line width')
             self.left_strafe_line.set_width(self.strafe_line_width)
             self.right_strafe_line.set_width(self.strafe_line_width)
             self.spinBox_28.setValue(self.strafe_line_width)
 
-            self.strafe_line_color = self.configdata['strafe_line_color']
+            self.strafe_line_color = get_config_or_exit('strafe_line_color', 'Strafe line color')
             self.left_strafe_line.set_color(self.strafe_line_color)
             self.right_strafe_line.set_color(self.strafe_line_color)
             self.comboBox_4.setCurrentIndex(COLOR_DICT[self.strafe_line_color])
 
         except Exception as e:
-            self.msg(f'ERROR:{str(e)} not found.Using default configuration')
+            self.msg(f'ERROR:{str(e)} during initialization')
+            # 发生其他异常时也退出程序
+            QtWidgets.QApplication.quit()
+            sys.exit(1)
 
 
     def hotkeyFormatParse(self,hotkeyFormatstr:str):
@@ -496,6 +645,8 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.configdata['railheight'] = self.railheight
         self.configdata['cchwinwidthMargin'] = self.cchwinwidthMargin
         self.configdata['heigthMargin'] = self.cchwinheigthMargin
+        self.configdata['mtNameLength'] = self.mtNameLength
+        self.configdata['mtNameMargin'] = self.mtNameMargin
         self.configdata['cfgwin_geo'] = self.cfgwin_geo
         self.configdata['hotkeyFormatstr'] = self.hotkeyFormatstr
         self.hotkeyFormatList=[]
@@ -587,10 +738,114 @@ class CFGWIN(QWidget,Ui_CFGWIN):
 
         self.msg(f'INFO:You choose to show marks {self.mark_pos}')
 
+
+
+    def scanLogDir(self):
+        """简化的目录扫描，处理Watchdog初始化和重启"""
+        if not os.path.exists(self.eqLogDir):
+            # 如果目录不存在，停止现有监控
+            if hasattr(self, 'observer') and self.observer.is_alive():
+                try:
+                    self.observer.stop()
+                    self.observer.join()
+                except RuntimeError as e:
+                    self.msg(f"WARNING: {str(e)}")
+            return
+
+        # 停止现有监控（如果正在运行）
+        if hasattr(self, 'observer') and self.observer.is_alive():
+            try:
+                self.observer.stop()
+                self.observer.join()
+            except RuntimeError as e:
+                self.msg(f"WARNING: {str(e)}")
+
+        # 初始化或重启Watchdog监控
+        try:
+            if not hasattr(self, 'observer'):
+                self.observer = Observer()
+                self.log_handler = LogFileHandler(self)
+
+            # 确保没有重复调度
+            if self.observer._handlers:  # 检查是否有已注册的处理程序
+                self.observer.unschedule_all()
+
+            self.observer.schedule(self.log_handler, self.eqLogDir, recursive=False)
+
+            # 仅在未运行时启动
+            if not self.observer.is_alive():
+                self.observer.start()
+
+        except Exception as e:
+            self.msg(f"ERROR: Failed to start directory monitor: {str(e)}")
+            return
+
+        # 扫描目录中的现有文件
+        try:
+            for fn in os.listdir(self.eqLogDir):
+                path = os.path.join(self.eqLogDir, fn)
+                if self.applyLogfileFilter(path) and path not in self.lastSizesOfLogFiles:
+                    size = os.path.getsize(path)
+                    self.lastSizesOfLogFiles[path] = size
+
+                    """
+                    # 如果没有当前日志文件，选择第一个匹配的文件
+                    if not self.curLogFile:
+                        self.curLogFile = path
+                        self.yourName = path.split("_")[1]
+                        self.msg(f"INFO: Initial log file set to: {self.curLogFile}")
+                        self.logfilechanged = True
+                    """
+
+
+        except Exception as e:
+            self.msg(f"ERROR: Error scanning log directory: {str(e)}")
+
+
+
+    def handle_log_change(self, new_file):
+        """处理日志文件变化"""
+        try:
+            new_size = os.path.getsize(new_file)
+            #self.file_change_counter+=1
+            #print(f"new file change:{new_file},current counter {self.file_change_counter}")
+            # 如果是当前文件且大小变化了
+            if new_file == self.curLogFile:
+                if new_size != self.lastSizesOfLogFiles.get(new_file, 0):
+                    self.lastSizesOfLogFiles[new_file] = new_size
+                return
+
+
+            # 如果是文件只是其他属性改变，但大小未变，不做处理，可能被其他程序打开过，但实际无修改。
+            if self.lastSizesOfLogFiles[new_file] == new_size:
+                return
+
+
+            # 如果变化确实是文件切换了，有实质文件内容增长
+            self.lastSizesOfLogFiles[new_file] = new_size
+
+            if self.curLogFile != "":
+                self.yourName = self.curLogFile.split("_")[1]
+                self.saveWeaponForYourName()
+            self.curLogFile = new_file
+            self.yourName = self.curLogFile.split("_")[1]
+            self.setWeaponsForYourName()
+            self.setupYourNameToAggroMeter()
+            self.logTaker.initialize_filters(self.yourName)
+            self.setupYourNameToIngamecommand()
+
+            self.msg(f"INFO:Current log file is: {self.curLogFile}")
+            self.logfilechanged = True
+
+        except Exception as e:
+            self.msg(f"ERROR:Error handling log change: {str(e)}")
+
+
+
+
+    '''
     def scanLogDir(self):
 
-        if not os.path.exists(self.eqLogDir):
-            return
 
         currentSizesOfLogFiles={}
         for fn in os.listdir(self.eqLogDir):
@@ -612,6 +867,8 @@ class CFGWIN(QWidget,Ui_CFGWIN):
                 if self.curLogFile==filename:
                     self.lastSizesOfLogFiles[filename]=currentSizesOfLogFiles[filename]
                     return
+
+
                 if self.curLogFile!="":
                     self.yourName = self.curLogFile.split("_")[1]
                     self.saveWeaponForYourName()
@@ -625,6 +882,8 @@ class CFGWIN(QWidget,Ui_CFGWIN):
                 self.logfilechanged = True
                 self.lastSizesOfLogFiles = currentSizesOfLogFiles
                 return
+
+    '''
 
     def applyLogfileFilter(self, path: str):
 
@@ -641,7 +900,7 @@ class CFGWIN(QWidget,Ui_CFGWIN):
 
         return False
 
-
+    #@performance_monitor
     def scanCurrentLog(self):
 
         if self.curLogFile=='':
@@ -649,10 +908,22 @@ class CFGWIN(QWidget,Ui_CFGWIN):
 
         # log file更改后，此标志为true，当切换到新log file上后，此标志需复位为False
         if self.logfilechanged == True:
-            self.f.close()
-            self.f=open(self.curLogFile,encoding='utf-8')
-            self.f.seek(0,2)
+
+            if self.f is not None:
+                self.f.close()
+            try:
+                self.f=open(self.curLogFile,encoding='utf-8')
+                self.f.seek(0,2)
+            except UnicodeDecodeError:
+                self.msg(f"ERROR: File {self.curLogFile} is not UTF-8 encoded")
+                return
+            except IOError as e:
+                self.msg(f"ERROR: Cannot open file {self.curLogFile}: {str(e)}")
+                return
             self.logfilechanged = False
+
+        if not self.f:
+            return
 
         line=self.f.readline()
         self.blockSequenceNumber+=1
@@ -670,6 +941,7 @@ class CFGWIN(QWidget,Ui_CFGWIN):
                 self.ingameCommands.logProcessor(line)
             line = self.f.readline()
 
+    #@performance_monitor
     def logProcessor(self,line:str):
 
         ki=line.upper().find('!KI')
@@ -696,6 +968,7 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         if ki != -1:
             self.cchwin.someoneSpellInterrupted(line[27:26+ki])
 
+    #@performance_monitor
     def CH_hotkey_match(self,line:str):
 
         clericSN = ''
@@ -718,7 +991,7 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             clericSN = CH_line[0:middle]
         else:
             tankname = CH_line[0:middle]
-            tankname = tankname[0:5]
+            tankname = tankname[0:self.mtNameLength]
 
         CH_line = CH_line[middle+len(self.hotkeyFormat['middlekeyword']):]
 
@@ -731,13 +1004,13 @@ class CFGWIN(QWidget,Ui_CFGWIN):
                     clericSN = CH_line[0:tail]
                 else:
                     tankname = CH_line[0:tail]
-                    tankname = tankname[0:5]
+                    tankname = tankname[0:self.mtNameLength]
         else:
             if self.hotkeyFormat["pos_of_clericid"] > self.hotkeyFormat["pos_of_tankname"]:
                 clericSN = CH_line[0:]
             else:
                 tankname = CH_line[0:]
-                tankname = tankname[0:5]
+                tankname = tankname[0:self.mtNameLength]
 
 
         tankname=tankname.rstrip()
@@ -1102,7 +1375,6 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         if self.started:
 
             self.started = False
-            self.logfiledir_moniter_timer.stop()
             self.logfile_moniter_timer.stop()
             self.cchwin.restart_ani()
             self.agroMeter.hideAgroMeter()
@@ -1116,7 +1388,6 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             self.msg("INFO: Stop parsing log files.")
         else:
             self.started = True
-            self.logfiledir_moniter_timer.start(LOGDIR_MONITORING_INTERVAL)
             self.logfile_moniter_timer.start(LOG_MONITORING_INTERVAL)
             self.pushButton_3.setText("ON AIR")
             self.pushButton_3.setFont(self.font())
@@ -1283,8 +1554,9 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.lastSizesOfLogFiles = {}
         self.curLogFile = ''
         self.logfilechanged = False
-        self.f.close()
-        self.f = open('CCHPM RUN LOG.txt',encoding='utf-8')
+        if self.f is not None:
+            self.f.close()
+        self.f = None
 
         self.cchwinGeo=QtCore.QRect(586, 669, 358, 126)
         self.cchwin.setGeometry(self.cchwinGeo)
@@ -1304,6 +1576,28 @@ class CFGWIN(QWidget,Ui_CFGWIN):
 
         self.saveconfig()
         self.msg(f"INFO:Changed CH BAR height to {railheight}.")
+
+    def mtNameLengthHandler(self,nameLength:int):
+        if self.initializing:
+            return
+
+        self.mtNameLength=nameLength
+        self.cchwin.restart_ani()
+
+        self.saveconfig()
+        self.msg(f"INFO:Changed MT Name Length to {nameLength} characters.")
+
+    def mtNameMarginHandler(self,nameMargin:int):
+        if self.initializing:
+            return
+
+        self.mtNameMargin=nameMargin
+        self.cchwin.mt_name_margin=nameMargin
+        self.cchwin.restart_ani()
+
+        self.saveconfig()
+        self.msg(f"INFO:Changed MT Name Margin to {nameMargin} pixels.")
+
 
     def monitorwidthmargin(self,widthMargin:int):
         if self.initializing:
@@ -1355,7 +1649,7 @@ class CFGWIN(QWidget,Ui_CFGWIN):
     def setAgroMeterBackgroundColor(self):   #unusing function
         color = QtWidgets.QColorDialog.getColor()  # 打开颜色选择对话框
         if color.isValid():  # 如果用户选择了有效的颜色
-            print(color.name())
+            #print(color.name())
             self.agroMeter.label_agroMeterGreen.setStyleSheet(f"background: {color.name()};")  # 设置窗口背景颜色
             self.agroMeter.label_agroMeterYellow.setStyleSheet(f"background: {color.name()};")  # 设置窗口背景颜色
             self.agroMeter.label_errorMessage.setStyleSheet(f"background: {color.name()};")  # 设置窗口背景颜色
@@ -1449,8 +1743,8 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         os.startfile(".\\CCHPM RUN LOG.txt")
         os.startfile(".\\AgroMeter RUN LOG.txt")
         #self.agroMeter.test_reconnect()
-        print(f"Qt 版本: {QT_VERSION_STR}")  # 输出 Qt 库版本
-        print(f"PyQt5 版本: {PYQT_VERSION_STR}")  # 输出 PyQt5 绑定版本
+        #print(f"Qt 版本: {QT_VERSION_STR}")  # 输出 Qt 库版本
+        #print(f"PyQt5 版本: {PYQT_VERSION_STR}")  # 输出 PyQt5 绑定版本
 
 if __name__ == "__main__":
 

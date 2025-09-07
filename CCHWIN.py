@@ -27,6 +27,7 @@ class CCHWIN(QWidget):
         self.interval=1
         self.railheight=20
         self.markheight=10
+        self.mt_name_margin=1
         self.mark_pos="On bar"  #On bar/Under bar/Above bar.
         self.railslots = []
         self.max_rails = 0
@@ -138,7 +139,11 @@ class CCHWIN(QWidget):
         current_btn_width=width/10
         mt_btn.resize(current_btn_width, height)
         mt_btn.move(pos_x-current_btn_width-self.widthMargin, pos_y)
-        mt_btn.setStyleSheet('QPushButton{border: none; background: peru;}')
+        #mt_btn.setStyleSheet('QPushButton{border: none; background: peru;}')
+
+
+        style=f'border: none; background: peru; text-align: left; padding-left: {self.mt_name_margin}px;'
+        mt_btn.setStyleSheet('QPushButton{'+style+'}')
 
         mt_btn.setAttribute(QtCore.Qt.WA_TranslucentBackground) # 设置窗口背景透明
         mt_btn.setAutoFillBackground(True)
@@ -176,7 +181,7 @@ class CCHWIN(QWidget):
     def create_ani(self,tankname="name",clericid="AAA",clericName="name"):
         if self.anidict.get(tankname) == None:
             if not self.__create_cchrail(tankname):
-                print("no enough space to display CH chain for",tankname)
+                #print("no enough space to display CH chain for",tankname)
                 return
         self.anidict[tankname][8].add_id(clericid)
         next_clericid=self.nextid(tankname,clericid)
@@ -241,7 +246,7 @@ class CCHWIN(QWidget):
 
         self.animation = QPropertyAnimation(end_mark, b'pos', self.anidict[tankname][5])
         self.animation.setKeyValueAt(0, QPoint(width-5, -3))
-        self.animation.setKeyValueAt(1, QPoint(0, -3))
+        self.animation.setKeyValueAt(1, QPoint(-5, -3))
         self.animation.setDuration(10000) # CH casting time =10s
         self.animation.start()
         self.anidict[tankname][10].append(self.animation)
