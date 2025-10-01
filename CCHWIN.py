@@ -218,7 +218,11 @@ class CCHWIN(QWidget):
         self.btn.setText(clericid)
         if clericid.upper() == "GAP":  #make the gap ch bar little transparent. so they won't override main chain.
             self.btn.setStyleSheet('QPushButton{border: none; background-color: rgba(0, 128, 0, 100);}')
+        else:
+            self.TTS(clericid.lstrip('0'),True)
 
+        if self.you == next_clericid:
+            self.TTS("Your next",False)
 
         self.buttonlist.append(self.btn)
         self.btnText2clericName[clericid]=clericName
@@ -393,6 +397,12 @@ class CCHWIN(QWidget):
                 self.anidict[tankname][7][9 - interval].setStyleSheet('color: yellow;')
 
         self.interval=interval
+
+    def TTS(self,message:str, interruptable:bool):
+
+        if hasattr(self, 'tts_handler'):
+            self.tts_handler(message,interruptable)
+
 
 
 if __name__ == "__main__":

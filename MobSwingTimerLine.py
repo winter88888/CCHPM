@@ -19,6 +19,7 @@ class TransparentLineWidget(QWidget):
         # 线条样式属性
         self.line_color = QColor(255, 0, 0)  # 红色线条
         self.line_width = 3
+        self.line_length = 0
 
     def paintEvent(self, event):
         painter = QPainter(self)
@@ -28,17 +29,14 @@ class TransparentLineWidget(QWidget):
         pen = QPen(self.line_color, self.line_width)
         painter.setPen(pen)
 
-        # 绘制垂直线(居左)
-        width = self.width()
-        height = self.height()
-        painter.drawLine(0, 0, 0, height)
+        # 绘制水平线（从右向左缩短，位于顶端，长度逐渐缩短)
+        painter.drawLine(self.line_length, 0, 0, 0)  # 从右到左绘制在顶端
 
-
-class StrafeLine(QWidget):
+class MobSwingTimerLine(QWidget):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle('Strafe Line')
-        self.setGeometry(100, 100, 400, 400)
+        self.setWindowTitle('Mob Swing Timer Line')
+        self.setGeometry(600, 500, 400, 400)
 
         # 创建透明线窗口
         self.line_window = TransparentLineWidget()
@@ -62,8 +60,12 @@ class StrafeLine(QWidget):
     def hide_line(self):
         self.line_window.hide()
 
-    def set_width(self,width:int):
+    def set_line_width(self,width:int):
         self.line_window.line_width=width
+        self.line_window.update()
+
+    def set_line_length(self,length:int):
+        self.line_window.line_length=length
         self.line_window.update()
 
     def set_color(self, color: str):
@@ -76,12 +78,12 @@ class StrafeLine(QWidget):
     def reAdjustLines(self):
         rect = self.geometry()
         self.line_window.setGeometry(
-            rect.x(), rect.y(), rect.width(), rect.height()
+            rect.x(), rect.y() - 30, rect.width(), rect.height()
         )
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    window = StrafeLine()
+    window = MobSwingTimerLine()
     window.show_line()
     sys.exit(app.exec_())

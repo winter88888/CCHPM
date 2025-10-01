@@ -15,6 +15,10 @@ import resource
 from LogTaker import *
 from IngameCommand import *
 from StrafeRunLine import *
+from LogImitation import *
+from BotGinaProxy import *
+from BackupRestoreDialog import *
+from CopyUI import *
 
 import time
 import functools
@@ -118,6 +122,8 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.ifRightStrafeLineEnabled=False
         self.ifLeftStrafeLineEnabled=False
         self.file_change_counter = 0
+        self.ifBotGinaProxyEnabled = False
+        self.bot_gina_proxy = BotGinaProxy(self)
 
         self.initializing = True
         self.msg('INFO:Initializing configuration.Please wait...')
@@ -172,9 +178,14 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         if self.agroMeterOnlineSyncEnabled:
             self.onlineSyncHandler_timer.start(ONLINE_SYNC_INTERVAL)
 
-
         # 启动监控
         self.scanLogDir()
+
+        self.log_imitation_dialog = None
+
+        # Text to speak initialisation
+        self.cchwin.tts_handler=self.TTS
+        #here you can add more handler to other module if needed
 
     '''
         # 添加性能报告定时器
@@ -311,6 +322,14 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.configdata['strafe_line_width'] = 3
         self.configdata['strafe_line_color'] = "Red"
 
+        self.configdata['ifBotGinaProxyEnabled'] = True
+        self.configdata['ifMobSwingTimerEnabled'] = True
+
+        self.configdata['mobSwingTimerGeo']: QtCore.QRect(586, 831, 351, 45)
+
+        self.configdata['ifTTSEnabled'] = False
+
+
     def get_config_date_safely(self, argument: str):
         try:
             data = self.configdata[argument]
@@ -356,7 +375,11 @@ class CFGWIN(QWidget,Ui_CFGWIN):
                 "leftStrafeLineEnabled": False,
                 "rightStrafeLineEnabled": False,
                 "strafe_line_width": 3,
-                "strafe_line_color": "Red"
+                "strafe_line_color": "Red",
+                "ifBotGinaProxyEnabled":True,
+                "ifMobSwingTimerEnabled":True,
+                "mobSwingTimerGeo":QtCore.QRect(586, 831, 351, 45),
+                "ifTTSEnabled":False
             }
 
             # 返回默认值，如果键不存在于默认值中则返回 None
@@ -457,7 +480,6 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             self.comboBox_2.setCurrentIndex(self.comboBox_2.findText(self.hotkeyFormatstr))
             self.pushButton_12.setEnabled(False)
 
-            self.msg("INFO:CCHPM finished initialization. Waiting for your order now.")
             self.cchwin.restart_ani()
             self.cchwin.reAdjustRails()
 
@@ -473,8 +495,11 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             self.agroMeter.setGeometry(self.agroMeterGeo)
             self.agroNetworkMeterGeo = get_config_or_exit('agroNetworkMeterGeo', 'Agro network meter geometry')
             self.agroMeter.window_network.setGeometry(self.agroNetworkMeterGeo)
-
+            self.mobSwingTimerGeo = get_config_or_exit('mobSwingTimerGeo', 'Mob swing timer geometry')
+            self.agroMeter.window_mst.setGeometry(self.mobSwingTimerGeo)
             self.agroMeter.reAdjustPanel()
+
+
             self.hideAgroMeterInterval = get_config_or_exit('hideAgroMeterInterval', 'Hide agro meter interval')
             self.spinBox_23.setValue(int(self.hideAgroMeterInterval))
             self.agroTableExpireDuration = get_config_or_exit('agroTableExpireDuration', 'Agro table expire duration')
@@ -589,6 +614,30 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             self.right_strafe_line.set_color(self.strafe_line_color)
             self.comboBox_4.setCurrentIndex(COLOR_DICT[self.strafe_line_color])
 
+            self.ifBotGinaProxyEnabled = get_config_or_exit('ifBotGinaProxyEnabled', 'Bot Gina Proxy enabled flag')
+            self.checkBox_12.setChecked(self.ifBotGinaProxyEnabled)
+            if self.ifBotGinaProxyEnabled:
+                self.bot_gina_proxy.setProxyEnabled()
+            else:
+                self.bot_gina_proxy.setProxyDisabled()
+
+            self.ifMobSwingTimerEnabled = get_config_or_exit('ifMobSwingTimerEnabled', 'Mob Swing Timer enabled flag')
+            self.checkBox_13.setChecked(self.ifMobSwingTimerEnabled)
+            cchwin_width = self.cchwinGeo.getRect()[2]
+            self.agroMeter.set_mst_pixels_per_second(cchwin_width/10)
+            if self.ifMobSwingTimerEnabled:
+                self.agroMeter.setMobSwingTimerEnabled()
+            else:
+                self.agroMeter.setMobSwingTimerDisabled()
+
+            self.ifTTSEnabled = get_config_or_exit('ifTTSEnabled', 'TTS enabled flag')
+            self.checkBox_14.setChecked(self.ifTTSEnabled)
+
+
+
+            self.msg("INFO:CCHPM finished initialization. Waiting for your order now.")
+
+
         except Exception as e:
             self.msg(f'ERROR:{str(e)} during initialization')
             # 发生其他异常时也退出程序
@@ -660,6 +709,10 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.agroNetworkMeterGeo=self.agroMeter.window_network.geometry()
         self.configdata['agroNetworkMeterGeo'] =self.agroNetworkMeterGeo
 
+        self.mobSwingTimerGeo=self.agroMeter.window_mst.geometry()
+        self.configdata['mobSwingTimerGeo'] =self.mobSwingTimerGeo
+
+
         self.configdata["hideAgroMeterInterval"] = self.hideAgroMeterInterval
         self.configdata['agroTableExpireDuration']=self.agroTableExpireDuration
         self.configdata['agroMeterOpacity']=self.agroMeterOpacity
@@ -688,6 +741,11 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.configdata['rightStrafeLineEnabled'] = self.ifRightStrafeLineEnabled
         self.configdata['strafe_line_width'] = self.strafe_line_width
         self.configdata['strafe_line_color'] = self.strafe_line_color
+
+        self.configdata['ifBotGinaProxyEnabled'] = self.ifBotGinaProxyEnabled
+        self.configdata['ifMobSwingTimerEnabled'] = self.ifMobSwingTimerEnabled
+
+        self.configdata['ifTTSEnabled'] = self.ifTTSEnabled
 
 
         with open('CCHPM.ini', 'wb') as f:
@@ -733,7 +791,8 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.cchwin.mark_pos=self.mark_pos
         self.cchwin.restart_ani()
         self.cchwin.reAdjustRails()
-
+        cchwin_width = self.cchwinGeo.getRect()[2]
+        self.agroMeter.set_mst_pixels_per_second(cchwin_width / 10)
         self.saveconfig()
 
         self.msg(f'INFO:You choose to show marks {self.mark_pos}')
@@ -817,7 +876,7 @@ class CFGWIN(QWidget,Ui_CFGWIN):
 
 
             # 如果是文件只是其他属性改变，但大小未变，不做处理，可能被其他程序打开过，但实际无修改。
-            if self.lastSizesOfLogFiles[new_file] == new_size:
+            if self.lastSizesOfLogFiles.get(new_file,0) == new_size:
                 return
 
 
@@ -833,7 +892,7 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             self.setupYourNameToAggroMeter()
             self.logTaker.initialize_filters(self.yourName)
             self.setupYourNameToIngamecommand()
-
+            self.setupYourNameToBotGinaProxy()
             self.msg(f"INFO:Current log file is: {self.curLogFile}")
             self.logfilechanged = True
 
@@ -931,15 +990,86 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             self.blockSequenceNumber =0
 
         while(line):
-            if self.ifstartCHMonitor == True:
-                self.logProcessor(line)
-            if self.agroMeterEnabled == True:
-                self.agroMeter.logProcessor(line,self.blockSequenceNumber)
-            if self.ifRALogTakerEnabled == True:
-                self.logTaker.online_process(line)
-            if self.ifIngameDiscordCommandEnabled == True:
-                self.ingameCommands.logProcessor(line)
+            self.uiControlCommandHandler(line)
+            if self.started:
+                if self.ifstartCHMonitor == True:
+                    self.logProcessor(line)
+                if self.agroMeterEnabled == True:
+                    self.agroMeter.logProcessor(line,self.blockSequenceNumber)
+                if self.ifRALogTakerEnabled == True:
+                    self.logTaker.online_process(line)
+                if self.ifIngameDiscordCommandEnabled == True:
+                    self.ingameCommands.logProcessor(line)
+                if self.ifBotGinaProxyEnabled == True:
+                    self.bot_gina_proxy.logProcessor(line)
             line = self.f.readline()
+
+    def uiControlCommandHandler(self,line:str):
+
+
+        if line[26:]==" cchpm-cch-monitor is not online at this time.\n":
+            if self.ifstartCHMonitor:
+                self.startCHMonitor(False)
+                self.checkBox.setChecked(False)
+            else:
+                self.startCHMonitor(True)
+                self.checkBox.setChecked(True)
+
+        if line[26:]==" cchpm-aggro-meter is not online at this time.\n":
+            if self.agroMeterEnabled:
+                self.agroMeterEnablingHandler(False)
+                self.checkBox_2.setChecked(False)
+            else:
+                self.agroMeterEnablingHandler(True)
+                self.checkBox_2.setChecked(True)
+
+        if line[26:]==" cchpm-ralog-taker is not online at this time.\n":
+            if self.ifRALogTakerEnabled:
+                self.RALogTakerEnabled(False)
+                self.checkBox_3.setChecked(False)
+            else:
+                self.RALogTakerEnabled(True)
+                self.checkBox_3.setChecked(True)
+
+        if line[26:]==" cchpm-ingame-discord-bot-command is not online at this time.\n":
+            if self.ifIngameDiscordCommandEnabled:
+                self.enableIngameDiscordCommandHandler(False)
+            else:
+                self.enableIngameDiscordCommandHandler(True)
+
+
+
+        if line[26:]==" cchpm-lstrafe is not online at this time.\n":
+            if self.ifLeftStrafeLineEnabled:
+                self.enableLeftStrafeLine(False)
+                self.checkBox_10.setChecked(False)
+            else:
+                self.enableLeftStrafeLine(True)
+                self.checkBox_10.setChecked(True)
+
+        if line[26:]==" cchpm-rstrafe is not online at this time.\n":
+            if self.ifRightStrafeLineEnabled:
+                self.enableRightStrafeLine(False)
+                self.checkBox_11.setChecked(False)
+            else:
+                self.enableRightStrafeLine(True)
+                self.checkBox_11.setChecked(True)
+
+        if line[26:] == " cchpm-bot-log-proxy is not online at this time.\n":
+            if self.ifBotGinaProxyEnabled:
+                self.enableBotGinaProxyHandler(False)
+                self.checkBox_12.setChecked(False)
+            else:
+                self.enableBotGinaProxyHandler(True)
+                self.checkBox_12.setChecked(True)
+
+        if line[26:] == " cchpm-tts is not online at this time.\n":
+            if self.ifTTSEnabled:
+                self.enableTTSHandler(False)
+                self.checkBox_14.setChecked(False)
+            else:
+                self.enableTTSHandler(True)
+                self.checkBox_14.setChecked(True)
 
     #@performance_monitor
     def logProcessor(self,line:str):
@@ -1017,7 +1147,7 @@ class CFGWIN(QWidget,Ui_CFGWIN):
 
         self.msg(f"{clericName},{clericSN}, CH -> {tankname}")
 
-        if self.started and tankname != '':
+        if tankname != '':
             self.cchwin.create_ani(tankname,clericSN,clericName)
             if clericName == 'You':
                 self.cchwin.you= clericSN
@@ -1070,8 +1200,7 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             self.msg("INFO:Agro Meter function enabled.")
             self.checkBox_2.setStyleSheet("QCheckBox { color: green; }")
             self.checkBox_5.setEnabled(True)
-            self.aggroMeterOnlineFuncHandler(True)
-            self.checkBox_5.setChecked(True)
+            self.checkBox_13.setEnabled(True)
 
         else:
             self.msg("INFO:Agro Meter function disabled.")
@@ -1081,10 +1210,17 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             self.checkBox_5.setChecked(False)
             self.agroMeter.hide()
             self.agroMeter.window_network.hide()
+            self.agroMeter.window_mst.hide()
             self.agroMeter.hideAgroMeter()
             self.agroMeter.hideAgroMeter()
             self.agroMeter.hideNetworkAgroMeter()
             self.agroMeter.hideNetworkAgroMeter()
+
+            self.checkBox_13.setEnabled(False)
+            self.enableMobSwingTimerHandler(False)
+            self.checkBox_13.setChecked(False)
+            self.agroMeter.window_mst.hide_line()
+            self.agroMeter.mst_text_label.hide()
 
     def aggroMeterOnlineFuncHandler(self,isOnlineSyncEnabled:bool):
         if self.initializing:
@@ -1205,10 +1341,18 @@ class CFGWIN(QWidget,Ui_CFGWIN):
 
         self.ingameCommands.setupYourName(self.yourName)
 
+    def setupYourNameToBotGinaProxy(self):
+
+        self.bot_gina_proxy.setupYourName(self.yourName)
+
+
     def enableIngameDiscordCommandHandler(self,userChecked:bool):
 
         if self.initializing:
             return
+
+        # 临时阻塞信号
+        self.checkBox_8.blockSignals(True)
 
         if userChecked:
             self.ifIngameDiscordCommandEnabled = self.ingameCommands.setWebhook()
@@ -1226,6 +1370,8 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             self.checkBox_8.setStyleSheet("QCheckBox { color: red; }")
             self.checkBox_8.setChecked(False)
 
+        # 恢复信号
+        self.checkBox_8.blockSignals(False)
 
     def enableProxyIngameCommandHandler(self,userChecked:bool):
 
@@ -1265,7 +1411,7 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             self.left_strafe_line.hide_line()
             self.msg("INFO:Left Strafe Line Disabled.")
 
-    def enableRightStrfeLine(self, userChecked: bool):
+    def enableRightStrafeLine(self, userChecked: bool):
 
         if self.initializing:
             return
@@ -1301,6 +1447,74 @@ class CFGWIN(QWidget,Ui_CFGWIN):
 
         self.saveconfig()
         self.msg(f"INFO:Strafe run line color changed to {color}.")
+
+    def enableBotGinaProxyHandler(self, userChecked: bool):
+
+        if self.initializing:
+            return
+
+        self.ifBotGinaProxyEnabled = userChecked
+
+        self.saveconfig()
+        if self.ifBotGinaProxyEnabled:
+            self.bot_gina_proxy.setProxyEnabled()
+            self.msg("INFO:Bot Gina Proxy Enabled.")
+        else:
+            self.bot_gina_proxy.setProxyDisabled()
+            self.msg("INFO:Bot Gina Proxy Disabled.")
+
+    def botListHandler(self):
+        if self.initializing:
+            return
+
+        # 显示bot编辑器对话框
+        self.bot_gina_proxy.show_bot_editor()
+        self.msg('Bot List Editor opened. Edit the list to proxy their log to GINA.')
+
+    def backupEQHandler(self):
+        if self.initializing:
+            return
+
+        """Handle backup EQ configuration"""
+        if not self.eqLogDir:
+            self.msg("ERROR: EQ log directory not set")
+            return
+
+        backup_dialog = BackupRestoreDialog(self, self.eqLogDir)
+        backup_dialog.exec_()
+
+    def copyUIHandler(self):
+        if self.initializing:
+            return
+
+        """Handle copy EQ UI"""
+        if not self.eqLogDir:
+            self.msg("ERROR: EQ log directory not set")
+            return
+
+        # Get EQ directory (parent of log directory)
+        eq_dir = os.path.dirname(self.eqLogDir)
+        if not os.path.exists(eq_dir):
+            self.msg(f"ERROR: EQ directory does not exist: {eq_dir}")
+            return
+
+        copyui_dialog = CopyUIDialog(self, eq_dir)
+        copyui_dialog.exec_()
+
+    def enableMobSwingTimerHandler(self, userChecked: bool):
+
+        if self.initializing:
+            return
+
+        self.ifMobSwingTimerEnabled = userChecked
+
+        self.saveconfig()
+        if self.ifMobSwingTimerEnabled:
+            self.agroMeter.setMobSwingTimerEnabled()
+            self.msg("INFO:Mob Swing Timer Enabled.")
+        else:
+            self.agroMeter.setMobSwingTimerDisabled()
+            self.msg("INFO:Mob Swing Timer Disabled.")
 
 
 
@@ -1428,6 +1642,11 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             self.agroMeter.window_network.setGeometry(self.agroNetworkMeterGeo)
             self.agroMeter.window_network.show()
 
+            self.agroMeter.window_mst.setWindowOpacity(0.5)
+            self.agroMeter.window_mst.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Tool)
+            self.agroMeter.window_mst.setGeometry(self.mobSwingTimerGeo)
+            self.agroMeter.window_mst.show()
+
         if self.ifLeftStrafeLineEnabled:
             self.left_strafe_line.setWindowOpacity(0.5)
             self.left_strafe_line.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Tool)
@@ -1439,6 +1658,8 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             self.right_strafe_line.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.Tool)
             self.right_strafe_line.setGeometry(self.rightStrafeLineGeo)
             self.right_strafe_line.show()
+
+
 
     def modifyMonitorUIdone(self):
 
@@ -1469,12 +1690,14 @@ class CFGWIN(QWidget,Ui_CFGWIN):
 
         self.agroMeter.hide()
         self.agroMeter.window_network.hide()
+        self.agroMeter.window_mst.hide()
         self.agroMeter.stopTestAgroMeter()
         self.agroMeter.reAdjustPanel()
         self.agroMeter.hideAgroMeter()
         self.agroMeter.hideAgroMeter()
         self.agroMeter.hideNetworkAgroMeter()
         self.agroMeter.hideNetworkAgroMeter()
+        self.agroMeter.window_mst.hide_line()
 
         self.left_strafe_line.hide()
         self.right_strafe_line.hide()
@@ -1495,6 +1718,9 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.agroMeter.reAdjustPanel()
         self.left_strafe_line.reAdjustLines()
         self.right_strafe_line.reAdjustLines()
+
+        cchwin_width = self.cchwinGeo.getRect()[2]
+        self.agroMeter.set_mst_pixels_per_second(cchwin_width / 10)
 
         #此处需获取CCHWIN的相关参数，并保存到配置文件中，包括geometry
         self.msg("Saving current configurations and readjust UI layout.")
@@ -1540,6 +1766,10 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             self.agroMeter.reAdjustPanel()
         self.left_strafe_line.reAdjustLines()
         self.right_strafe_line.reAdjustLines()
+
+        cchwin_width = self.cchwinGeo.getRect()[2]
+        self.agroMeter.set_mst_pixels_per_second(cchwin_width / 10)
+
         self.msg("Readjust UI layout.")
 
     def default(self):
@@ -1562,6 +1792,9 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.cchwin.setGeometry(self.cchwinGeo)
         self.cchwin.restart_ani()
         self.cchwin.reAdjustRails()
+        cchwin_width = self.cchwinGeo.getRect()[2]
+        self.agroMeter.set_mst_pixels_per_second(cchwin_width / 10)
+
         self.msg("INFO:Reset all configuration to default value.")
         self.initializing = False
 
@@ -1573,6 +1806,8 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.railheight=railheight
         self.cchwin.restart_ani()
         self.cchwin.reAdjustRails()
+        cchwin_width = self.cchwinGeo.getRect()[2]
+        self.agroMeter.set_mst_pixels_per_second(cchwin_width / 10)
 
         self.saveconfig()
         self.msg(f"INFO:Changed CH BAR height to {railheight}.")
@@ -1607,6 +1842,8 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.cchwinwidthMargin=widthMargin
         self.cchwin.restart_ani()
         self.cchwin.reAdjustRails()
+        cchwin_width = self.cchwinGeo.getRect()[2]
+        self.agroMeter.set_mst_pixels_per_second(cchwin_width / 10)
 
         self.saveconfig()
         self.msg(f"INFO:Changed width margin to {widthMargin}.")
@@ -1620,7 +1857,8 @@ class CFGWIN(QWidget,Ui_CFGWIN):
         self.cchwinheigthMargin=heigthMargin
         self.cchwin.restart_ani()
         self.cchwin.reAdjustRails()
-
+        cchwin_width = self.cchwinGeo.getRect()[2]
+        self.agroMeter.set_mst_pixels_per_second(cchwin_width / 10)
         self.saveconfig()
         self.msg(f"INFO:Changed height margin to {heigthMargin}.")
 
@@ -1739,12 +1977,129 @@ class CFGWIN(QWidget,Ui_CFGWIN):
             self.comboBox_2.removeItem(self.comboBox_2.currentIndex())
             self.msg(f'WARNING:You deleted the CH format "{self.comboBox_2.currentText()}"')
 
+    def logImitationHandler(self):
+        if self.initializing:
+            return
+
+        # 检查对话框是否存在且正在运行
+        if hasattr(self, 'log_imitation_dialog') and self.log_imitation_dialog:
+            # 如果对话框存在但已经关闭，清理引用
+            if not self.log_imitation_dialog.isVisible():
+                self.log_imitation_dialog = None
+            else:
+                # 对话框已存在且可见，将其前置
+                self.log_imitation_dialog.raise_()
+                self.log_imitation_dialog.activateWindow()
+                return
+
+        # 创建新对话框
+        self.log_imitation_dialog = LogImitationDialog(self, self.eqLogDir)
+        # 连接finished信号，确保对话框关闭时正确清理
+        self.log_imitation_dialog.finished.connect(self.on_imitation_dialog_closed)
+        self.log_imitation_dialog.show()
+
+        self.msg('Log Imitation tool opened. Select a log file to imitate.')
+
+    def on_imitation_dialog_closed(self, result=None):
+        """对话框关闭时的清理函数"""
+        # 确保停止任何正在运行的模仿线程
+        if (hasattr(self, 'log_imitation_dialog') and
+                self.log_imitation_dialog and
+                hasattr(self.log_imitation_dialog, 'is_running') and
+                self.log_imitation_dialog.is_running):
+
+            # 请求停止模仿
+            self.log_imitation_dialog.stop_imitation()
+
+            # 等待线程结束（非阻塞方式）
+            if (hasattr(self.log_imitation_dialog, 'thread') and
+                    self.log_imitation_dialog.thread and
+                    self.log_imitation_dialog.thread.is_alive()):
+                # 使用QTimer来延迟清理，避免阻塞UI
+                QtCore.QTimer.singleShot(100, self.cleanup_imitation_dialog)
+                return
+
+        # 立即清理
+        self.cleanup_imitation_dialog()
+
+    def cleanup_imitation_dialog(self):
+        """清理对话框引用"""
+        if hasattr(self, 'log_imitation_dialog'):
+            # 确保对话框被正确关闭和删除
+            try:
+                if self.log_imitation_dialog.isVisible():
+                    self.log_imitation_dialog.close()
+            except:
+                pass
+            finally:
+                self.log_imitation_dialog = None
+
+    def enableTTSHandler(self, userChecked: bool):
+
+        if self.initializing:
+            return
+
+        self.ifTTSEnabled = userChecked
+
+        self.saveconfig()
+        if self.ifTTSEnabled:
+            self.msg("INFO:Text to speach Enabled.Wonder and found!")
+        else:
+            self.msg("INFO:Text to speach Disabled.Wonder and found!")
+
+
+
+    def TTS(self, text_to_speak: str, interruptable:bool):
+        """
+        将文本转换为语音命令，写入日志文件
+        格式: [Fri Sep 12 22:05:03 2025] !TTS 要朗读的文字
+        输出到: 程序当前目录/Logs/eqlog_TTS_P1999Green.txt
+        """
+
+        if not self.ifTTSEnabled:
+            return
+
+        if not text_to_speak or not text_to_speak.strip():
+            self.msg("WARNING: TTS text is empty, skipping.")
+            return
+
+        try:
+            # 获取当前时间并格式化为EQ日志格式
+            current_time = datetime.datetime.now()
+            timestamp = current_time.strftime("[%a %b %d %H:%M:%S %Y]")
+
+            # 构建完整的TTS命令行
+            if interruptable:
+                tts_command = f"{timestamp} !TTSI {text_to_speak.strip()}"
+            else:
+                tts_command = f"{timestamp} !TTSNI {text_to_speak.strip()}"
+
+
+            # Create log directory if it doesn't exist
+            log_dir = pathlib.Path("./Logs")  # 修改为 ./Logs 目录
+            log_dir.mkdir(exist_ok=True)  # 确保目录存在
+            target_log_path = os.path.join(log_dir, "eqlog_TTS_P1999Green.txt")
+
+
+            # 写入TTS命令到日志文件
+            with open(target_log_path, 'a', encoding='utf-8') as log_file:
+                log_file.write(tts_command + '\n')
+                log_file.flush()
+
+            self.msg(f"INFO: TTS command written to: {target_log_path}")
+            self.msg(f"TTS content: {text_to_speak}")
+
+        except Exception as e:
+            self.msg(f"ERROR: Failed to write TTS command: {str(e)}")
+
     def openHistoryLog(self):
         os.startfile(".\\CCHPM RUN LOG.txt")
         os.startfile(".\\AgroMeter RUN LOG.txt")
         #self.agroMeter.test_reconnect()
         #print(f"Qt 版本: {QT_VERSION_STR}")  # 输出 Qt 库版本
         #print(f"PyQt5 版本: {PYQT_VERSION_STR}")  # 输出 PyQt5 绑定版本
+
+
 
 if __name__ == "__main__":
 

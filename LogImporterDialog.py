@@ -6,7 +6,7 @@ import re
 
 from PyQt5.QtCore import Qt,QTimer, QSettings, QRect
 from PyQt5.QtWidgets import (QLineEdit, QMessageBox, QComboBox, QDialog, QVBoxLayout, QHBoxLayout, QLabel,
-                             QPushButton, QPlainTextEdit, QProgressBar, QFileDialog, QWidget)
+                             QPushButton, QPlainTextEdit, QProgressBar, QFileDialog, QWidget, QMainWindow)
 
 
 import sys

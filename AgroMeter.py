@@ -9,6 +9,7 @@ from NetworkThread import *
 from PyQt5.Qt import *
 from PyQt5.QtCore import QTimer, QDateTime
 from PyQt5 import QtCore, QtGui, QtWidgets
+from MobSwingTimerLine import *
 
 #globe definition
 #hit type const
@@ -50,6 +51,26 @@ class AgroTable:
         self.threatList=[]
         self.engageTime=time.time()
         self.lastSeenTime=self.engageTime
+
+        # 新增批次攻击相关字段
+        self.batch_attack_timestamps = []  # 存储批次攻击的时间戳
+        self.batch_attack_intervals = []   # 存储批次攻击间隔
+        self.last_batch_time = 0           # 最后一批次攻击时间
+        self.current_batch_sequence = -1   # 当前批次序列号
+        self.batch_attack_count = 0        # 当前批次攻击次数
+
+        # 新增字段用于Mob Swing Timer
+        self.attack_timestamps = []  # 存储最近攻击的时间戳
+        self.attack_intervals = []   # 存储攻击间隔
+        self.avg_interval = 0        # 当前平均攻击间隔（秒）
+        self.next_attack_time = 0    # 预测的下次攻击时间
+        self.last_attack_time = 0    # 最后一次攻击时间
+
+        # Mob Swing Timer UI相关字段
+        self.swing_timer_active = False
+        self.swing_total_time = 0      # 总攻击间隔时间
+        self.swing_elapsed_time = 0    # 已过去的时间
+        self.swing_start_time = 0      # 当前计时开始时间
 
 class Weapon:
     def __init__(self):
@@ -131,6 +152,11 @@ class AgroMeter(QWidget):
         self.ifShowTankDiscEnabled = False
         self.onlineChannel = "default"
 
+        # MST相关配置
+        self.ifMobSwingTimerEnabled = False
+        self.currentMobSwingMessage = ""
+        self.mst_pixels_per_second = 50  # 每秒对应的像素长度，可动态修改
+        self.mst_total_pixels = 0
 
         self.funcCalculateSwingAgro={
             ("???", "???"): self.viewer_mode,
@@ -306,6 +332,28 @@ class AgroMeter(QWidget):
         self.label_network.resize(400, 300)
         self.label_network.hide()
 
+        # Mob Swing Timer UI组件
+        self.window_mst = MobSwingTimerLine()
+        self.window_mst.setWindowTitle("Mob Swing Timer")
+        self.window_mst.hide()
+        self.window_mst.hide_line()
+        # 创建MST文字标签
+        self.mst_text_label = QtWidgets.QLabel()
+        self.mst_text_label.setAttribute(QtCore.Qt.WA_TranslucentBackground)
+        self.mst_text_label.setAutoFillBackground(True)
+        self.mst_text_label.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Tool)
+        self.mst_text_label.setStyleSheet('color: lightgreen;')
+        self.mst_text_label.setFont(QtGui.QFont("Arial", 8))
+        self.mst_text_label.setAlignment(Qt.AlignLeft)  # 左对齐
+        self.mst_text_label.hide()
+
+
+        # MST更新定时器（在UI线程中运行）
+        self.mst_timer = QTimer(self)
+        self.mst_timer.timeout.connect(self.update_mst_ui)
+        self.mst_timer.start(30)  # 每30ms更新一次UI，30帧每秒。
+
+
     def load_server_address(self):
         """从server.txt文件中加载服务器配置"""
         global AM_SERVER, AM_PORT
@@ -345,6 +393,16 @@ class AgroMeter(QWidget):
         self.label_network.move(self.network_posx, self.network_posy)
         self.label_network.resize(self.network_width, self.network_height)
 
+        self.window_mst.reAdjustLines()
+        # 获取MST线条窗口的位置
+        line_rect = self.window_mst.line_window.geometry()
+        line_x = line_rect.x()  # 线条的X坐标（最左边）
+        line_y = line_rect.y()
+        line_height = 5 #max 5 pixel
+
+        # 在MST线条下方显示文字信息（左对齐）
+        text_y = line_y + line_height + 2  # 线条下方2像素
+        self.mst_text_label.move(line_x, text_y)  # 保持左对齐，使用线条的最左边X坐标
 
     def initializeWeaponBase(self):
 
@@ -739,10 +797,10 @@ class AgroMeter(QWidget):
         if self.checkWizardSpellEffects(line) == True:
             return
 
-        #if self.checkAnySeenMobs(line)==True:  #not very needed as for now. skipped
-        #    return
+        if self.checkAnySeenMobs(line,blockSequenceNumber) == True:
+            return
 
-        if self.checkAndSetCurrentTarget(line)==True:
+        if self.checkAndSetCurrentTarget(line) == True:
             return
 
         if line[26:42]==" You have slain " :          #your target perished
@@ -2189,10 +2247,173 @@ class AgroMeter(QWidget):
 
         return False
 
+    def checkAnySeenMobs(self, line: str, blockSequenceNumber: int):
+        """
+        监测怪物攻击动作，按批次计算攻击间隔
+        """
+        if not self.ifMobSwingTimerEnabled:
+            return False
 
-    def checkAnySeenMobs(self,line:str):
+        if not self.currentMobSwingMessage:
+            return False
+
+        if len(line) < 27:
+            return False
+
+        try:
+            message_content = line[27:]
+            match = re.match(self.currentMobSwingMessage, message_content)
+
+            if match and self.currentTarget in self.agroTableDict:
+                current_time = time.time()
+                at = self.agroTableDict[self.currentTarget]
+                at.lastSeenTime = current_time
+
+                # 检查是否为同一批次（100毫秒内的攻击视为同一批次）
+                is_same_batch = False
+                if at.last_batch_time > 0 and current_time - at.last_batch_time <= 0.1:  # 100毫秒
+                    is_same_batch = True
+
+                # 如果是新批次或者批次序列号未设置
+                if not is_same_batch or at.current_batch_sequence == -1:
+                    # 记录上一批次的时间（如果有）
+                    if at.last_batch_time > 0:
+                        interval = current_time - at.last_batch_time
+                        at.batch_attack_intervals.append(interval)
+
+                        # 保持最近5次批次间隔数据
+                        if len(at.batch_attack_intervals) > 5:
+                            at.batch_attack_intervals.pop(0)
+
+                    # 开始新批次
+                    at.last_batch_time = current_time
+                    at.current_batch_sequence = blockSequenceNumber
+                    at.batch_attack_count = 1
+
+                    # 记录批次时间戳
+                    at.batch_attack_timestamps.append(current_time)
+                    if len(at.batch_attack_timestamps) > 10:  # 保留最近10个批次
+                        at.batch_attack_timestamps.pop(0)
+                else:
+                    # 同一批次，增加攻击计数
+                    at.batch_attack_count += 1
+
+                # 计算平均批次间隔（使用最近3-5次）
+                num_intervals = min(3, len(at.batch_attack_intervals))
+                if num_intervals > 0:
+                    recent_intervals = at.batch_attack_intervals[-num_intervals:]
+                    at.avg_interval = sum(recent_intervals) / num_intervals
+
+                    # 计算线条总长度（基于预测时间和像素/秒比例）
+                    self.mst_total_pixels = int(at.avg_interval * self.mst_pixels_per_second)
+
+                    # 启动MST计时
+                    at.swing_timer_active = True
+                    at.swing_total_time = at.avg_interval
+                    at.swing_start_time = current_time
+                    at.swing_elapsed_time = 0
+
+                    # 显示MST UI
+                    self.show_mst_ui()
+
+                return True
+
+        except Exception as e:
+            print(f"解析怪物攻击行时出错: {e}")
+            return False
 
         return False
+
+    # 添加方法来动态修改像素/秒比例
+    def set_mst_pixels_per_second(self, pixels_per_second):
+        """动态设置每秒对应的像素长度"""
+        self.mst_pixels_per_second = max(10, pixels_per_second)  # 限制在10-200之间
+
+    # 修改update_mst_position方法
+    def update_mst_position(self, progress):
+        """更新MST线条的位置（从右向左缩短，位于顶端）"""
+        if not self.ifMobSwingTimerEnabled:
+            return
+
+        # 计算线条长度（基于剩余时间比例，从右向左缩短）
+        line_length = int(self.mst_total_pixels * progress)
+
+        self.window_mst.set_line_length(line_length)
+
+    # 修改update_mst_ui方法中的位置更新调用
+    def update_mst_ui(self):
+        """在UI线程中定期更新MST显示"""
+        if not self.ifMobSwingTimerEnabled or self.currentTarget not in self.agroTableDict:
+            self.window_mst.hide_line()
+            self.mst_text_label.hide()
+            return
+
+        at = self.agroTableDict[self.currentTarget]
+
+        if not at.swing_timer_active or at.swing_total_time <= 0:
+            self.window_mst.hide_line()
+            return
+
+        # 计算已过去的时间和剩余时间
+        current_time = time.time()
+        at.swing_elapsed_time = current_time - at.swing_start_time
+        remaining_time = max(0, at.swing_total_time - at.swing_elapsed_time)
+
+        # 如果计时结束，隐藏UI
+        if remaining_time <= 0:
+            at.swing_timer_active = False
+            self.window_mst.hide_line()
+            return
+
+        # 计算进度百分比（剩余时间占比）
+        progress = remaining_time / at.swing_total_time
+
+        # 根据进度设置颜色
+        if progress > 0.66:
+            color = "Green"
+        elif progress > 0.33:
+            color = "Yellow"
+        else:
+            color = "Red"
+
+        # 设置线条颜色
+        self.window_mst.set_color(color)
+
+        # 计算线条宽度（根据剩余时间动态调整）
+        base_width = 3
+        if remaining_time < 1.0:  # 最后1秒闪烁效果
+            if int(current_time * 2) % 2 == 0:  # 每秒闪烁2次
+                width = base_width + 2
+            else:
+                width = base_width
+        else:
+            width = base_width
+
+        self.window_mst.set_line_width(width)
+
+        # 更新线条位置和显示（从右向左缩短）
+        self.update_mst_position(progress)
+        self.window_mst.show_line()
+        self.updateMobSwingTimerText()
+
+    # 修改show_mst_ui方法
+    def show_mst_ui(self):
+        """显示MST UI并定位到合适位置"""
+        if not self.ifMobSwingTimerEnabled:
+            return
+
+        if self.currentTarget not in self.agroTableDict:
+            return
+
+        at = self.agroTableDict[self.currentTarget]
+
+        if at.swing_timer_active and at.swing_total_time > 0:
+            # 初始化线条位置（满长度，从右侧开始）
+            self.update_mst_position(1.0)  # 初始为100%长度
+            self.window_mst.set_color("Green")
+            self.window_mst.set_line_width(3)
+            self.window_mst.show_line()
+
 
 
     def checkAndSetCurrentTarget(self,line:str):
@@ -2301,6 +2522,20 @@ class AgroMeter(QWidget):
         if self.currentTarget!=capitalized_mobName:
             self.currentTarget=capitalized_mobName
             self.recompileProcLandMsg(capitalized_mobName)
+            self.recompileMobSwingMsg(capitalized_mobName)
+            # 重置攻击计时数据
+            at = self.agroTableDict[self.currentTarget]
+            at.attack_timestamps = []
+            at.attack_intervals = []
+            at.avg_interval = 0
+            at.next_attack_time = 0
+            at.last_attack_time = 0
+            # 重置批次数据
+            at.batch_attack_timestamps = []
+            at.batch_attack_intervals = []
+            at.last_batch_time = 0
+            at.current_batch_sequence = -1
+            at.batch_attack_count = 0
 
         self.currentTargetTotalAgroSnapshot=self.agroTableDict[self.currentTarget].TotalAgro
 
@@ -2323,6 +2558,34 @@ class AgroMeter(QWidget):
             oh_proc_land_msg = self.weaponDict[self.OHWeapon].procLandMsg.replace("@PLAYERNAME",self.yourName,1)
             self.currentOHProcLandMessage = oh_proc_land_msg.replace("Someone",capitalized_mobName, 1)
 
+    def recompileMobSwingMsg(self, capitalized_mobName: str):
+        if capitalized_mobName == "":
+            return
+
+        # 正确转义怪物名称中的特殊字符，但保持空格为普通空格
+        mob_name_pattern = re.escape(capitalized_mobName).replace(r'\ ', ' ')
+
+        self.currentMobSwingMessage = (
+            r'^{0} '  # 怪物名称（开头匹配）
+            r'(?:tries to )?'  # 可选 "tries to"
+            r'(?:bite|claw|crush|gore|hit|maul|pierce|punch|slash|slice|sting)'  # 攻击类型
+            r'.*'  # 剩余部分
+        ).format(mob_name_pattern)
+        return
+
+    def updateMobSwingTimerText(self):
+        if not self.ifMobSwingTimerEnabled:
+            return
+
+        if self.currentTarget not in self.agroTableDict:
+            return
+
+        at = self.agroTableDict[self.currentTarget]
+
+        batch_info = f"combo: {at.batch_attack_count} hits"
+        self.mst_text_label.setText(f"mob swing timer:[ {at.avg_interval:.1f}s ] ({batch_info})")
+        self.mst_text_label.adjustSize()
+        self.mst_text_label.show()
 
     def updateAgroMeter(self):
         if self.currentTarget=="" or self.currentTarget not in self.agroTableDict:
@@ -2445,6 +2708,19 @@ class AgroMeter(QWidget):
         else:
             self.isNetMeterHide = True
             self.label_network.hide()
+
+
+    def setMobSwingTimerEnabled(self):
+
+        self.ifMobSwingTimerEnabled = True
+
+
+
+    def setMobSwingTimerDisabled(self):
+
+        self.ifMobSwingTimerEnabled = False
+
+
 
 
 if __name__ == "__main__":
