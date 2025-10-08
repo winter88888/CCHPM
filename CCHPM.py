@@ -1,6 +1,9 @@
 ﻿import sys
 import os
 import time
+
+from PyQt5.QtGui import QIcon
+
 from ui_CFGWIN import *
 from CCHWIN import *
 from AgroMeter import *

@@ -1,14 +1,18 @@
 import sys
-import os
 from PyQt5.Qt import *
-from PyQt5.QtCore import QTimer, QDateTime
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtCore import QTimer
+from PyQt5 import QtCore, QtWidgets
 from ClericIDManager import *
 
 #const definition
 CCHRAILPTR = 0
 ANILISTPTR = 1
 RAILCAPACITY = 20
+
+class CHButton(QPushButton):
+    def __init__(self, parent=None, clericName=""):
+        super().__init__(parent)
+        self.clericName = clericName  # 添加 clericName 字段
 
 
 class CCHWIN(QWidget):
@@ -20,7 +24,7 @@ class CCHWIN(QWidget):
         # key : tankname, Value[0]: cch rail , Value[1] : animation list of this rail. value[2] : index of railslots
         # value[3]: mt_btn , value[4]:cleric_btn, value[5]:mark rail, value[6]:mark lables, value[7]:bar lables
         # value[8]: object of cleric ids class, value[9]: last cleric id
-        # initialzied as [cchrail, [], pickedslot, mt_btn, cleric_btn, markrail, marklables, barlables, cleric_ids, '']
+        # initialized as [cchrail, [], pickedslot, mt_btn, cleric_btn, markrail, marklables, barlables, cleric_ids, '']
         self.buttonlist=[]
         self.btnText2clericName={}
         self.clericName2v={}
@@ -179,6 +183,13 @@ class CCHWIN(QWidget):
 
 
     def create_ani(self,tankname="name",clericid="AAA",clericName="name"):
+
+        #check if the clericName is casting a CH already. If so ,that hotkey should be a fake casting as no one can cast another CH in 10s.
+        if clericName == 'You':
+            self.yourSpellInterrupted()
+        else:
+            self.someoneSpellInterrupted(clericName)
+
         if self.anidict.get(tankname) == None:
             if not self.__create_cchrail(tankname):
                 #print("no enough space to display CH chain for",tankname)
@@ -193,7 +204,8 @@ class CCHWIN(QWidget):
             self.anidict[tankname][4].setStyleSheet('QPushButton{color: none;border: none; background: purple;}')
 
         current_cchrail=self.anidict[tankname][CCHRAILPTR]
-        self.btn = QPushButton(current_cchrail)
+        self.btn = CHButton(current_cchrail, clericName=clericName)
+        #self.btn = QPushButton(current_cchrail)
         #self.btn = QPushButton()
         width = current_cchrail.geometry().getRect()[2]
         height = current_cchrail.geometry().getRect()[3]
@@ -308,30 +320,27 @@ class CCHWIN(QWidget):
                 self.railslots[a[2]][0]='FREE'
 
     def yourSpellInterrupted(self):
-
         for btn in self.buttonlist:
-            if btn.text()==self.you:
+            if isinstance(btn, CHButton) and btn.clericName == "You":  # 使用 clericName 进行匹配
                 btn.hide()
 
         if "You" in self.clericName2v:
             try:
-                self.clericName2v["You"].hide()            # =end_mark.hide()
+                self.clericName2v["You"].hide()          # =end_mark.hide()
             except (RuntimeError, AttributeError):
-                # 捕获对象被销毁或无 hide 方法的情况
-                del self.clericName2v["You"]
+                del self.clericName2v["You"]             # 捕获对象被销毁或无 hide 方法的情况
 
-    def someoneSpellInterrupted(self,clericName:str):
+    def someoneSpellInterrupted(self, clericName: str):
         for btn in self.buttonlist:
-            if btn.text() in self.btnText2clericName:
-                if self.btnText2clericName[btn.text()] == clericName:
-                    btn.hide()
+            if isinstance(btn, CHButton) and btn.clericName == clericName:  # 使用 clericName 进行匹配
+                btn.hide()
 
         if clericName in self.clericName2v:
             try:
-                self.clericName2v[clericName].hide()            # =end_mark.hide()
+                self.clericName2v[clericName].hide()      # =end_mark.hide()
             except (RuntimeError, AttributeError):
-                # 捕获对象被销毁或无 hide 方法的情况
-                del self.clericName2v[clericName]
+                del self.clericName2v[clericName]         # 捕获对象被销毁或无 hide 方法的情况
+
 
 
 

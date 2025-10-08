@@ -19,6 +19,7 @@ class NetworkThread(threading.Thread):
         self.recv_buffer=b''
         self.onlineChannel = "default"
         self.lastCharName = "Unknown"
+        self.playerAggroList = {}
 
     def logErrorMessage(self,message:str,type:str):
 
@@ -30,6 +31,9 @@ class NetworkThread(threading.Thread):
         self.running = True
         while self.running:
             try:
+                # 尝试重连前清空队列，避免历史垃圾update
+                self._clear_send_queue()
+
                 # 创建新连接
                 self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.socket.connect((self.host, self.port))
@@ -39,6 +43,8 @@ class NetworkThread(threading.Thread):
                 # 设置消息回调
                 self.logErrorMessage("Connected to server successfully.","info")
                 self.socket_connected = True
+
+
                 # 主处理循环
                 while self.socket_connected:
                     # 处理接收
@@ -64,23 +70,64 @@ class NetworkThread(threading.Thread):
                 self.logErrorMessage(f"Connecting error: {str(e)}","info")
                 time.sleep(self.retry_interval)
 
+    def _clear_send_queue(self):
+        """清空发送队列"""
+        while not self.send_queue.empty():
+            try:
+                self.send_queue.get_nowait()
+            except:
+                break
+
     def stop(self):
         self.running = False
         if self.socket:
             self.socket.close()
 
-    def send_data(self, type:str,character_name, mob_name, threat_value):
+    def send_data(self, type: str, character_name, mob_name, threat_value):
 
-
-        if type=="channel_update":
+        if type == "channel_update":
             self.onlineChannel = mob_name
 
-        self.send_queue.put({
+        queue_item = {
             "type": type,
             "character_name": character_name,
             "mobName": mob_name,
             "threat_value": threat_value,
-        })
+        }
+
+        # 根据不同类型处理入队逻辑
+        if type == "threat_update":
+            # 检查mobName是否在playerAggroList中且threat_value无变化
+            if mob_name in self.playerAggroList:
+                if self.playerAggroList[mob_name] == threat_value:
+                    # threat_value无变化，不入队
+                    return
+                else:
+                    # threat_value有变化，更新并入队
+                    self.playerAggroList[mob_name] = threat_value
+                    self.send_queue.put(queue_item)
+            else:
+                # mobName不在playerAggroList中，新增并入队
+                self.playerAggroList[mob_name] = threat_value
+                self.send_queue.put(queue_item)
+
+        elif type == "mob_slain":
+            # 从playerAggroList中移除该mob
+            if mob_name in self.playerAggroList:
+                self.playerAggroList.pop(mob_name)
+            self.send_queue.put(queue_item)
+
+        elif type == "clear_all_aggro":
+            # 清空playerAggroList和发送队列，然后入队clear_all_aggro
+            self.playerAggroList.clear()
+            self._clear_send_queue()
+            self.send_queue.put(queue_item)
+
+        else:
+            # 其他类型直接入队
+            self.send_queue.put(queue_item)
+
+
 
         '''
         if self.lastCharName != character_name:
@@ -92,6 +139,7 @@ class NetworkThread(threading.Thread):
                 "threat_value": 0,
             })
         '''
+
 
     def handle_ready_read(self):
         buffer=bytes()

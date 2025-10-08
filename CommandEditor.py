@@ -550,7 +550,7 @@ class CommandEditor(QWidget):
             Command(False, "yourself", "guild chat", "MALOSINI", True, False),
             Command(False, "yourself", "guild chat", "OOS", True, False),
             Command(False, "yourself", "guild chat", "SLOW", True, False),
-            Command(False, "yourself", "guild chat", "!addraid", True, False),
+            Command(False, "yourself", "guild chat", "!note", True, False),
         ]
 
         self.commands = default_commands

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>CFGWIN</class>
  <widget class="QWidget" name="CFGWIN">
@@ -17,7 +17,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>CCHPM v3.19 --Chain CH Performance Monitor</string>
+   <string>CCHPM v3.21 --Chain CH Performance Monitor</string>
   </property>
   <widget class="QPushButton" name="pushButton">
    <property name="geometry">
@@ -923,7 +923,7 @@
   <widget class="QPushButton" name="pushButton_10">
    <property name="geometry">
     <rect>
-     <x>740</x>
+     <x>730</x>
      <y>660</y>
      <width>81</width>
      <height>31</height>
