@@ -297,8 +297,8 @@ class AgroMeter(QWidget):
         #self.label_agroMeterYellow.setWordWrap(True)
         self.label_agroMeterYellow.setAttribute(QtCore.Qt.WA_TranslucentBackground)  # 设置窗口背景透明
         self.label_agroMeterYellow.setAutoFillBackground(True)
-        self.label_agroMeterYellow.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Tool) # 永远最前，无边框标题栏，去任务栏标签
-        self.label_agroMeterYellow.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents) #窗口点击而过，不响应鼠标（貌似无效）
+        self.label_agroMeterYellow.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Tool | Qt.WindowTransparentForInput) # 永远最前，无边框标题栏，去任务栏标签，窗口点击而过
+        #self.label_agroMeterYellow.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents) #窗口点击而过，不响应鼠标（貌似无效）
         self.label_agroMeterYellow.setStyleSheet('color: lightgreen;')           #was yellow but too hard to see in bright environment.
 
         self.label_agroMeterGreen = QtWidgets.QLabel()
@@ -306,8 +306,8 @@ class AgroMeter(QWidget):
         #self.label_agroMeterGreen.setWordWrap(True)
         self.label_agroMeterGreen.setAttribute(QtCore.Qt.WA_TranslucentBackground)  # 设置窗口背景透明
         self.label_agroMeterGreen.setAutoFillBackground(True)
-        self.label_agroMeterGreen.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Tool) # 永远最前，无边框标题栏，去任务栏标签
-        self.label_agroMeterGreen.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents) #窗口点击而过，不响应鼠标（貌似无效）
+        self.label_agroMeterGreen.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Tool | Qt.WindowTransparentForInput) # 永远最前，无边框标题栏，去任务栏标签，窗口点击而过
+        #self.label_agroMeterGreen.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents) #窗口点击而过，不响应鼠标（貌似无效）
         self.label_agroMeterGreen.setStyleSheet('color: lightgreen;')
 
         self.label_errorMessage = QtWidgets.QLabel()
@@ -315,8 +315,8 @@ class AgroMeter(QWidget):
         self.label_errorMessage.setWordWrap(True)
         self.label_errorMessage.setAttribute(QtCore.Qt.WA_TranslucentBackground)  # 设置窗口背景透明
         self.label_errorMessage.setAutoFillBackground(True)
-        self.label_errorMessage.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Tool) # 永远最前，无边框标题栏，去任务栏标签
-        self.label_errorMessage.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents) #窗口点击而过，不响应鼠标（貌似无效）
+        self.label_errorMessage.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Tool | Qt.WindowTransparentForInput) # 永远最前，无边框标题栏，去任务栏标签，窗口点击而过
+        #self.label_errorMessage.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents) #窗口点击而过，不响应鼠标（貌似无效）
         self.label_errorMessage.setStyleSheet('color: red;')
         self.errorMessage_timer = QTimer(self)
         self.errorMessage_timer.timeout.connect(self.label_errorMessage.hide)
@@ -327,7 +327,7 @@ class AgroMeter(QWidget):
         self.label_network = QtWidgets.QLabel()  # 新增用于显示网络仇恨的组件
         self.label_network.setAttribute(QtCore.Qt.WA_TranslucentBackground)
         self.label_network.setAutoFillBackground(True)
-        self.label_network.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Tool)
+        self.label_network.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Tool | Qt.WindowTransparentForInput) # 永远最前，无边框标题栏，去任务栏标签，窗口点击而过
         self.label_network.setStyleSheet('color: cyan;')
         self.label_network.resize(400, 300)
         self.label_network.hide()
@@ -341,7 +341,7 @@ class AgroMeter(QWidget):
         self.mst_text_label = QtWidgets.QLabel()
         self.mst_text_label.setAttribute(QtCore.Qt.WA_TranslucentBackground)
         self.mst_text_label.setAutoFillBackground(True)
-        self.mst_text_label.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Tool)
+        self.mst_text_label.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Tool | Qt.WindowTransparentForInput) # 永远最前，无边框标题栏，去任务栏标签，窗口点击而过
         self.mst_text_label.setStyleSheet('color: lightgreen;')
         self.mst_text_label.setFont(QtGui.QFont("Arial", 8))
         self.mst_text_label.setAlignment(Qt.AlignLeft)  # 左对齐

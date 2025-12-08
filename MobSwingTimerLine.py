@@ -11,7 +11,8 @@ class TransparentLineWidget(QWidget):
         self.setWindowFlags(
             Qt.FramelessWindowHint |  # 无边框
             Qt.WindowStaysOnTopHint |  # 始终置顶
-            Qt.Tool  # 不显示在任务栏
+            Qt.Tool | # 不显示在任务栏
+            Qt.WindowTransparentForInput  # 永远最前，无边框标题栏，去任务栏标签，窗口点击而过
         )
         self.setAttribute(Qt.WA_TranslucentBackground)  # 透明背景
         self.setAttribute(Qt.WA_TransparentForMouseEvents)  # 鼠标事件穿透

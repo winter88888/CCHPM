@@ -17,7 +17,7 @@
    </font>
   </property>
   <property name="windowTitle">
-   <string>CCHPM v3.21 --Chain CH Performance Monitor</string>
+   <string>CCHPM v3.22 --Chain CH Performance Monitor</string>
   </property>
   <widget class="QPushButton" name="pushButton">
    <property name="geometry">

@@ -11,10 +11,11 @@ class TransparentLineWidget(QWidget):
         self.setWindowFlags(
             Qt.FramelessWindowHint |  # 无边框
             Qt.WindowStaysOnTopHint |  # 始终置顶
-            Qt.Tool  # 不显示在任务栏
+            Qt.Tool | # 不显示在任务栏
+            Qt.WindowTransparentForInput # 鼠标事件穿透
         )
         self.setAttribute(Qt.WA_TranslucentBackground)  # 透明背景
-        self.setAttribute(Qt.WA_TransparentForMouseEvents)  # 鼠标事件穿透
+        #self.setAttribute(Qt.WA_TransparentForMouseEvents)  # 鼠标事件穿透
 
         # 线条样式属性
         self.line_color = QColor(255, 0, 0)  # 红色线条

@@ -68,8 +68,8 @@ class CCHWIN(QWidget):
         cchrail.resize(self.width, self.railheight)
         cchrail.setAttribute(QtCore.Qt.WA_TranslucentBackground) # 设置窗口背景透明
         cchrail.setAutoFillBackground(True)
-        cchrail.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Tool)  # 永远最前，无边框标题栏，去任务栏标签
-        cchrail.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents) #窗口点击而过，不响应鼠标（貌似无效）。
+        cchrail.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Tool |Qt.WindowTransparentForInput )  # 永远最前，无边框标题栏，去任务栏标签,窗口点击而过
+
         if rail_y != None:
             cchrail.move(self.posx, rail_y+self.posy)
         cchrail.show()
@@ -85,8 +85,9 @@ class CCHWIN(QWidget):
             markrail.resize(self.width, self.markheight)
             markrail.setAttribute(QtCore.Qt.WA_TranslucentBackground)  # 设置窗口背景透明
             markrail.setAutoFillBackground(True)
-            markrail.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Tool)
-            markrail.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents)
+            markrail.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Tool |Qt.WindowTransparentForInput)
+            #markrail.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents) #this flag is not working so obsoleted. using Qt.WindowTransparentForInput instead.
+
             if rail_y != None:
                 if self.mark_pos=="Above bar":
                     markrail.move(self.posx, rail_y + self.posy-self.markheight)
@@ -151,8 +152,8 @@ class CCHWIN(QWidget):
 
         mt_btn.setAttribute(QtCore.Qt.WA_TranslucentBackground) # 设置窗口背景透明
         mt_btn.setAutoFillBackground(True)
-        mt_btn.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Tool)  # 永远最前，无边框标题栏，去任务栏标签
-        mt_btn.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents) #窗口点击而过，不响应鼠标（貌似无效）。
+        mt_btn.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Tool | Qt.WindowTransparentForInput)  # 永远最前，无边框标题栏，去任务栏标签，窗口点击而过。
+        #mt_btn.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents) #窗口点击而过，不响应鼠标（貌似无效）。
 
         op = QtWidgets.QGraphicsOpacityEffect()
         op.setOpacity(1) # 设置透明度的值，0.0到1.0，最小值0是透明，1是不透明
@@ -167,8 +168,8 @@ class CCHWIN(QWidget):
         cleric_btn.setStyleSheet('QPushButton{border: none; background: purple;}')
         cleric_btn.setAttribute(QtCore.Qt.WA_TranslucentBackground) # 设置窗口背景透明
         cleric_btn.setAutoFillBackground(True)
-        cleric_btn.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Tool)  # 永远最前，无边框标题栏，去任务栏标签
-        cleric_btn.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents) #窗口点击而过，不响应鼠标（貌似无效）。
+        cleric_btn.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint | Qt.Tool | Qt.WindowTransparentForInput)  # 永远最前，无边框标题栏，去任务栏标签，窗口点击而过。
+        #cleric_btn.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents) #窗口点击而过，不响应鼠标（貌似无效）。
 
         op = QtWidgets.QGraphicsOpacityEffect()
         op.setOpacity(1) # 设置透明度的值，0.0到1.0，最小值0是透明，1是不透明
