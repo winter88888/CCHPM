@@ -23,6 +23,7 @@ from BotGinaProxy import *
 from BackupRestoreDialog import *
 from CopyUI import *
 
+
 import time
 import functools
 from collections import defaultdict
@@ -890,7 +891,13 @@ class CFGWIN(QWidget,Ui_CFGWIN):
                 self.yourName = self.curLogFile.split("_")[1]
                 self.saveWeaponForYourName()
             self.curLogFile = new_file
-            self.yourName = self.curLogFile.split("_")[1]
+
+            # obsoleted as file directory may contain underscore too sometimes
+            #self.yourName = self.curLogFile.split("_")[1]
+
+            # 替换为先获取文件名（不含路径）,再按下划线分割
+            self.yourName = os.path.basename(self.curLogFile).split("_")[1]
+
             self.setWeaponsForYourName()
             self.setupYourNameToAggroMeter()
             self.logTaker.initialize_filters(self.yourName)
